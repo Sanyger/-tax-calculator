@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Калькулятор налогов при продаже коммерческой недвижимости в Санкт-Петербурге от RBMGROUP.RU</title>
+  <style>
+    :root { --bg:#0b1220; --card:#111a2e; --muted:#97a3b6; --text:#e8eefc; --accent:#4aa3ff; --danger:#ff5b5b; --ok:#43d17a; }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;background:linear-gradient(180deg,#070b14, #0b1220);color:var(--text);}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    h1{font-size:20px;margin:8px 0 18px}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:rgba(17,26,46,.92);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,.25)}
+    .row{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:640px){.row.two{grid-template-columns:1fr 1fr}}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="text"]{
+      width:100%;padding:12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);color:var(--text);outline:none;
+    }
+    input[disabled]{opacity:.55}
+    .seg{display:flex;gap:8px;flex-wrap:wrap}
+    .seg button{
+      border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);
+      padding:10px 12px;border-radius:10px;cursor:pointer;transition:.15s; font-size:13px;
+    }
+    .seg button.active{border-color:rgba(74,163,255,.9);box-shadow:0 0 0 3px rgba(74,163,255,.15)}
+    .seg button:disabled{opacity:.35; cursor:not-allowed; border-color:rgba(255,255,255,.08); box-shadow:none;}
+    .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:8px}
+    .warn{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(255,91,91,.28);background:rgba(255,91,91,.08);color:#ffd3d3;font-size:13px;line-height:1.35}
+    .ok{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(67,209,122,.25);background:rgba(67,209,122,.08);color:#c8ffe0;font-size:13px}
+    .result-line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+    .result-line:last-child{border-bottom:none}
+    .k{color:var(--muted);font-size:13px}
+    .v{font-weight:650; text-align:right; white-space:nowrap}
+    .pos{color:var(--ok)}
+    .neg{color:var(--danger)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);color:var(--text);cursor:pointer;
+    }
+    .btn.primary{border-color:rgba(74,163,255,.7);background:rgba(74,163,255,.14)}
+    .small{font-size:12px;color:var(--muted)}
+    .split{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+    .tag{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:var(--muted)}
+    .formula{
+      margin-top:10px;
+      padding:10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.16);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Калькулятор налогов при продаже коммерческой недвижимости в Санкт-Петербурге от RBMGROUP.RU</h1>
+
+    <div class="grid">
+      <!-- INPUTS -->
+      <div class="card">
+        <div class="row two">
+          <div>
+            <label>Цена продажи, ₽</label>
+            <input id="salePrice" type="text" inputmode="numeric" placeholder="например 10 000 000" />
+          </div>
+          <div>
+            <label>Кадастровая стоимость, ₽</label>
+            <input id="cadastral" type="text" inputmode="numeric" placeholder="например 10 000 000" />
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label>Годовая выручка после продажи (диапазон)</label>
+          <div class="seg" id="incomeBand">
+            <button data-band="A" class="active">до 20 млн</button>
+            <button data-band="B">20–250 млн</button>
+            <button data-band="C">250–450 млн</button>
+            <button data-band="D">&gt; 450 млн</button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label>Налоговый режим ИП</label>
+          <div class="seg" id="taxRegime">
+            <button data-reg="USN_6" class="active">6% с доходов</button>
+            <button data-reg="USN_7">7% доходы − расходы</button>
+            <button data-reg="OSNO" style="display:none">ОСНО</button>
+          </div>
+          <div class="hint" id="osnoHint" style="display:none">
+            Выбран диапазон выручки &gt; 450 млн — требуется более индивидуальный подсчёт. Для упрощённой оценки применены ставки 10% (налог) и 10% (НДС).
+          </div>
+        </div>
+
+        <div style="margin-top:14px" id="expensesWrap" hidden>
+          <label>Расходы, ₽ (подтверждённые)</label>
+          <input id="expenses" type="text" inputmode="numeric" placeholder="например 3 000 000 (или 0)" />
+          <div class="hint">Используется только для режима “7% доходы − расходы”.</div>
+        </div>
+
+        <div class="split"></div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div class="tag">Режим “перекуп”</div>
+            <div class="hint" style="margin-top:6px">Прибыль и % годовых считаются после всех налогов. Прибыль — по цене продажи.</div>
+          </div>
+          <div class="seg" id="flipToggle">
+            <button data-flip="OFF" class="active">Выключен</button>
+            <button data-flip="ON">Включить</button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px" id="flipBlock" hidden>
+          <div class="row two">
+            <div>
+              <label>Цена покупки, ₽</label>
+              <input id="buyPrice" type="text" inputmode="numeric" placeholder="например 9 000 000" />
+            </div>
+            <div>
+              <label>Доп. расходы, ₽ (ремонт/сделка и т.п.)</label>
+              <input id="flipExtraExpenses" type="text" inputmode="numeric" placeholder="например 200 000 (или 0)" />
+            </div>
+          </div>
+
+          <div class="row two" style="margin-top:10px">
+            <div>
+              <label>Дней реализации (по умолчанию 180)</label>
+              <input id="flipDays" type="text" inputmode="numeric" placeholder="180" />
+            </div>
+            <div>
+              <label>% годовых (после налогов)</label>
+              <input id="flipApr" type="text" disabled value="—" />
+            </div>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="btn" id="resetBtn">Сброс</button>
+        </div>
+
+        <div class="hint" style="margin-top:12px">
+          Пересчёт выполняется автоматически при любом изменении.
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="card">
+        <div class="small">Результат</div>
+
+        <div style="margin-top:10px">
+          <div class="result-line"><div class="k">База для налогов (СПб)</div><div class="v" id="rTaxBase">—</div></div>
+
+          <div class="result-line"><div class="k">Ставка НДС</div><div class="v" id="rVatRate">—</div></div>
+          <div class="result-line"><div class="k">НДС к уплате</div><div class="v neg" id="rVat">—</div></div>
+
+          <div class="split"></div>
+
+          <div class="result-line"><div class="k">Налог с продажи (до взносов)</div><div class="v neg" id="rMainTaxBefore">—</div></div>
+
+          <div class="result-line" id="contribRow1"><div class="k">Взносы ИП (фикс. 2026)</div><div class="v neg" id="rContribFixed">—</div></div>
+          <div class="result-line" id="contribRow2"><div class="k">Взносы ИП (1% свыше 300k)</div><div class="v neg" id="rContribExtra">—</div></div>
+          <div class="result-line" id="contribRow3"><div class="k">Взносы ИП (итого)</div><div class="v neg" id="rContribTotal">—</div></div>
+
+          <div class="result-line"><div class="k">Налог с продажи (после взносов)</div><div class="v neg" id="rMainTaxAfter">—</div></div>
+
+          <div class="split"></div>
+
+          <div class="result-line"><div class="k">Итого к уплате (НДС + налог + взносы)</div><div class="v neg" id="rTotalPayable">—</div></div>
+
+          <div class="split"></div>
+
+          <div class="result-line"><div class="k">“Перекуп”</div><div class="v" id="rFlipStatus">—</div></div>
+          <div class="result-line"><div class="k">Выручка (цена продажи)</div><div class="v pos" id="rFlipRevenue">—</div></div>
+          <div class="result-line"><div class="k">Затраты (покупка + доп.)</div><div class="v neg" id="rFlipCosts">—</div></div>
+          <div class="result-line"><div class="k">Налоги/взносы при перепродаже</div><div class="v neg" id="rFlipTaxes">—</div></div>
+          <div class="result-line"><div class="k">Прибыль перекупа (после налогов)</div><div class="v" id="rFlipProfitNet">—</div></div>
+          <div class="result-line"><div class="k">% годовых (после налогов)</div><div class="v" id="rFlipAPR">—</div></div>
+
+          <div class="split"></div>
+
+          <div class="btns">
+            <button class="btn primary" id="toggleFormulaBtn">Показать формулы</button>
+            <button class="btn" id="copyBtn">Скопировать расчёт</button>
+          </div>
+
+          <div id="formulaBox" class="formula" hidden>—</div>
+        </div>
+
+        <div id="message"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // ====== ВЗНОСЫ ИП 2026 ======
+  const FIXED_IP_CONTRIB_2026 = 57390;
+  const EXTRA_RATE = 0.01;
+  const EXTRA_THRESHOLD = 300000;
+  const EXTRA_CAP = 321818;
+
+  // ====== ОСНО (упрощённо для >450 млн) ======
+  const OSNO_TAX_RATE = 0.10; // налог
+  const OSNO_VAT_RATE = 0.10; // НДС
+
+  // ====== state ======
+  let state = {
+    band: "A",
+    reg: "USN_6",
+    flip: "OFF",
+    showFormula: false,
+  };
+
+  // ====== helpers ======
+  function parseMoney(str) {
+    if (!str) return 0;
+    const cleaned = String(str).replace(/[^\d.]/g, "");
+    if (!cleaned) return 0;
+    return Number(cleaned);
+  }
+  function fmtMoney(n) {
+    if (!isFinite(n)) return "—";
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
+  }
+  function fmtNumber(n) {
+    if (!isFinite(n)) return "—";
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+  function fmtOutflow(n) { return "− " + fmtMoney(n); }
+  function fmtInflow(n) { return fmtMoney(n); }
+  function pct(x){ return (x*100).toFixed(0) + "%"; }
+
+  function bandHuman(band){
+    return ({A:"до 20 млн",B:"20–250 млн",C:"250–450 млн",D:"> 450 млн"})[band] || "—";
+  }
+
+  // ====== thousands formatting for inputs ======
+  function formatInputThousands(input) {
+    const raw = input.value.replace(/[^\d]/g, "");
+    if (!raw) { input.value = ""; return; }
+    input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+  ["salePrice", "cadastral", "expenses", "buyPrice", "flipExtraExpenses", "flipDays"].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      formatInputThousands(el);
+      render();
+    });
+  });
+
+  function setActive(containerId, attr, value) {
+    const wrap = $(containerId);
+    [...wrap.querySelectorAll("button")].forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute(attr) === value);
+    });
+  }
+
+  // ====== доходные диапазоны: блокировка по базе для налогов ======
+  function updateBandAvailability(taxBase) {
+    const btnA = $("incomeBand").querySelector('button[data-band="A"]');
+    const btnB = $("incomeBand").querySelector('button[data-band="B"]');
+    const btnC = $("incomeBand").querySelector('button[data-band="C"]');
+    const btnD = $("incomeBand").querySelector('button[data-band="D"]');
+
+    const over20 = taxBase > 20_000_000;
+    const over250 = taxBase > 250_000_000;
+    const over450 = taxBase > 450_000_000;
+
+    btnA.disabled = over20;
+    btnB.disabled = over250;
+    btnC.disabled = over450;
+    btnD.disabled = false;
+
+    // если выбран недоступный — перескочим вверх
+    const cur = state.band;
+    if ((cur === "A" && btnA.disabled) || (cur === "B" && btnB.disabled) || (cur === "C" && btnC.disabled)) {
+      if (!btnB.disabled) state.band = "B";
+      else if (!btnC.disabled) state.band = "C";
+      else state.band = "D";
+      setActive("incomeBand", "data-band", state.band);
+    }
+
+    // если реально >450, принудительно D
+    if (over450 && state.band !== "D") {
+      state.band = "D";
+      setActive("incomeBand", "data-band", "D");
+    }
+  }
+
+  // ====== режимы: логика появления ОСНО при D ======
+  function applyRegimeRules() {
+    const isD = (state.band === "D");
+
+    const btn6 = $("taxRegime").querySelector('button[data-reg="USN_6"]');
+    const btn7 = $("taxRegime").querySelector('button[data-reg="USN_7"]');
+    const btnO = $("taxRegime").querySelector('button[data-reg="OSNO"]');
+    const osnoHint = $("osnoHint");
+
+    if (isD) {
+      // показываем ОСНО, запрещаем УСН
+      btnO.style.display = "";
+      btn6.disabled = true;
+      btn7.disabled = true;
+      btnO.disabled = false;
+
+      // принудительно OSNO
+      state.reg = "OSNO";
+      setActive("taxRegime","data-reg","OSNO");
+
+      // расходы не нужны
+      $("expensesWrap").hidden = true;
+
+      osnoHint.style.display = "";
+    } else {
+      // скрываем ОСНО, включаем УСН
+      btnO.style.display = "none";
+      btn6.disabled = false;
+      btn7.disabled = false;
+
+      // если случайно стояло OSNO — возвращаем на 6%
+      if (state.reg === "OSNO") {
+        state.reg = "USN_6";
+        setActive("taxRegime","data-reg","USN_6");
+      }
+
+      $("expensesWrap").hidden = (state.reg === "USN_6");
+      osnoHint.style.display = "none";
+    }
+  }
+
+  // ====== events ======
+  $("incomeBand").addEventListener("click", (e) => {
+    const b = e.target?.getAttribute?.("data-band");
+    if (!b) return;
+    if (e.target.disabled) return;
+    state.band = b;
+    setActive("incomeBand", "data-band", b);
+    applyRegimeRules();
+    render();
+  });
+
+  $("taxRegime").addEventListener("click", (e) => {
+    const r = e.target?.getAttribute?.("data-reg");
+    if (!r) return;
+    // если D — режим менять нельзя (только ОСНО)
+    if (state.band === "D") return;
+
+    state.reg = r;
+    setActive("taxRegime", "data-reg", r);
+    $("expensesWrap").hidden = (r === "USN_6");
+    render();
+  });
+
+  $("flipToggle").addEventListener("click", (e) => {
+    const f = e.target?.getAttribute?.("data-flip");
+    if (!f) return;
+    state.flip = f;
+    setActive("flipToggle", "data-flip", f);
+    $("flipBlock").hidden = (f === "OFF");
+    render();
+  });
+
+  $("toggleFormulaBtn").addEventListener("click", () => {
+    state.showFormula = !state.showFormula;
+    $("formulaBox").hidden = !state.showFormula;
+    $("toggleFormulaBtn").textContent = state.showFormula ? "Скрыть формулы" : "Показать формулы";
+    render();
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    $("salePrice").value = "";
+    $("cadastral").value = "";
+    $("expenses").value = "";
+    $("buyPrice").value = "";
+    $("flipExtraExpenses").value = "";
+    $("flipDays").value = "180";
+    $("flipApr").value = "—";
+
+    state.band = "A";
+    state.reg = "USN_6";
+    state.flip = "OFF";
+    setActive("incomeBand","data-band","A");
+    setActive("taxRegime","data-reg","USN_6");
+    setActive("flipToggle","data-flip","OFF");
+
+    $("expensesWrap").hidden = true;
+    $("flipBlock").hidden = true;
+
+    state.showFormula = false;
+    $("formulaBox").hidden = true;
+    $("toggleFormulaBtn").textContent = "Показать формулы";
+
+    $("message").innerHTML = "";
+    applyRegimeRules();
+    render();
+  });
+
+  $("copyBtn").addEventListener("click", async () => {
+    const text = buildTextForCopy();
+    try {
+      await navigator.clipboard.writeText(text);
+      $("message").innerHTML = `<div class="ok">✅ Скопировано в буфер обмена</div>`;
+      setTimeout(() => $("message").innerHTML = "", 1400);
+    } catch {
+      $("message").innerHTML = `<div class="warn">Не удалось скопировать. Можно выделить текст вручную.</div>`;
+    }
+  });
+
+  // ====== calc ======
+  function calcSale({salePrice, cadastral, band, regime, expenses}) {
+    const warnings = [];
+
+    const taxBase = Math.max(salePrice, cadastral);
+
+    if (salePrice > 0 && cadastral > 0 && salePrice < cadastral) {
+      warnings.push("СПб: цена ниже кадастровой — для налогов берём кадастровую стоимость.");
+    }
+    if (band === "D") {
+      warnings.push("Выбран диапазон выручки > 450 млн — требуется более индивидуальный подсчёт. Здесь применена упрощённая оценка (10% налог и 10% НДС).");
+    }
+
+    // Ставки зависят от режима
+    let vatRate = 0;
+    let mainRate = 0;
+    let mainName = "";
+    let mainTaxBase = taxBase;
+
+    if (regime === "OSNO") {
+      vatRate = OSNO_VAT_RATE;
+      mainRate = OSNO_TAX_RATE;
+      mainName = "ОСНО (упрощённо)";
+      mainTaxBase = taxBase; // упрощение
+    } else {
+      // УСН: ставка НДС по диапазону
+      vatRate = (band === "A") ? 0 : (band === "B" ? 0.05 : 0.07);
+      if (regime === "USN_6") {
+        mainRate = 0.06;
+        mainName = "6% с доходов";
+        mainTaxBase = taxBase;
+      } else {
+        mainRate = 0.07;
+        mainName = "7% доходы − расходы";
+        mainTaxBase = Math.max(taxBase - expenses, 0);
+      }
+    }
+
+    const vat = taxBase * vatRate;
+    const mainBefore = mainTaxBase * mainRate;
+
+    // Взносы считаем только для УСН (как было), а для ОСНО в этом калькуляторе скрываем (упрощение)
+    let contribFixed = 0, contribExtra = 0, contribTotal = 0, baseForExtra = 0;
+    let mainAfter = mainBefore;
+
+    if (regime !== "OSNO") {
+      contribFixed = FIXED_IP_CONTRIB_2026;
+
+      baseForExtra = (regime === "USN_6") ? taxBase : mainTaxBase;
+      contribExtra = Math.max(baseForExtra - EXTRA_THRESHOLD, 0) * EXTRA_RATE;
+      contribExtra = Math.min(contribExtra, EXTRA_CAP);
+
+      contribTotal = contribFixed + contribExtra;
+
+      mainAfter = Math.max(mainBefore - contribTotal, 0);
+    } else {
+      // ОСНО: взносы не учитываем в упрощённой модели — и ряд скрываем в UI
+      mainAfter = mainBefore;
+    }
+
+    const totalPayable = vat + mainAfter + contribTotal;
+
+    return {
+      taxBase,
+      vatRate, vat,
+      mainName, mainRate, mainTaxBase,
+      mainBefore, mainAfter,
+      contribFixed, contribExtra, contribTotal,
+      totalPayable,
+      warnings,
+      baseForExtra
+    };
+  }
+
+  function calcAll() {
+    const salePrice = parseMoney($("salePrice").value);
+    const cadastral = parseMoney($("cadastral").value);
+    const expenses = parseMoney($("expenses").value);
+
+    const taxBasePreview = Math.max(salePrice, cadastral);
+    updateBandAvailability(taxBasePreview);
+    applyRegimeRules();
+
+    const sale = calcSale({
+      salePrice,
+      cadastral,
+      band: state.band,
+      regime: state.reg,
+      expenses: (state.reg === "USN_6" ? 0 : expenses)
+    });
+
+    const flipEnabled = (state.flip === "ON");
+    const buyPrice = parseMoney($("buyPrice").value);
+    const extraCosts = parseMoney($("flipExtraExpenses").value);
+    const days = Math.max(parseMoney($("flipDays").value) || 180, 1);
+
+    let flip = {
+      enabled: flipEnabled,
+      days,
+      revenue: 0,
+      costs: 0,
+      taxes: 0,
+      profitNet: 0,
+      aprNet: null,
+      notes: []
+    };
+
+    if (flipEnabled) {
+      const revenue = salePrice;                 // прибыль перекупа по цене продажи
+      const costs = buyPrice + extraCosts;
+      const taxes = sale.totalPayable;
+
+      const profitNet = revenue - costs - taxes;
+      flip.revenue = revenue;
+      flip.costs = costs;
+      flip.taxes = taxes;
+      flip.profitNet = profitNet;
+
+      if (costs > 0) {
+        const apr = (profitNet / costs) * (365 / days);
+        flip.aprNet = apr;
+        $("flipApr").value = (apr * 100).toFixed(1) + "%";
+      } else {
+        flip.aprNet = null;
+        $("flipApr").value = "—";
+      }
+
+      if (!buyPrice) flip.notes.push("Укажи цену покупки — иначе перекуп считается неточно.");
+    } else {
+      $("flipApr").value = "—";
+    }
+
+    return { salePrice, cadastral, expenses, sale, flip };
+  }
+
+  function buildFormulaText(r) {
+    const s = r.sale;
+    const salePrice = r.salePrice;
+    const cad = r.cadastral;
+    const exp = (state.reg === "USN_6" || state.reg === "OSNO") ? 0 : r.expenses;
+
+    const lines = [];
+    lines.push("1) База для налогов (СПб):");
+    lines.push(`taxBase = max(ценаПродажи, кадастр) = max(${fmtNumber(salePrice)}, ${fmtNumber(cad)}) = ${fmtNumber(s.taxBase)}`);
+
+    lines.push("");
+    lines.push("2) НДС к уплате:");
+    lines.push(`НДС = taxBase × ставкаНДС = ${fmtNumber(s.taxBase)} × ${pct(s.vatRate)} = ${fmtNumber(s.vat)}`);
+
+    lines.push("");
+    lines.push("3) Налог с продажи (до взносов):");
+    if (state.reg === "USN_6") {
+      lines.push(`налогБаза = taxBase = ${fmtNumber(s.taxBase)}`);
+      lines.push(`налогДо = налогБаза × 6% = ${fmtNumber(s.mainBefore)}`);
+    } else if (state.reg === "USN_7") {
+      lines.push(`налогБаза = max(taxBase − расходы, 0) = max(${fmtNumber(s.taxBase)} − ${fmtNumber(exp)}, 0) = ${fmtNumber(s.mainTaxBase)}`);
+      lines.push(`налогДо = налогБаза × 7% = ${fmtNumber(s.mainBefore)}`);
+    } else {
+      lines.push(`(упрощение) налогБаза = taxBase = ${fmtNumber(s.taxBase)}`);
+      lines.push(`налогДо = налогБаза × 10% = ${fmtNumber(s.mainBefore)}`);
+    }
+
+    if (state.reg !== "OSNO") {
+      lines.push("");
+      lines.push("4) Взносы ИП 2026:");
+      lines.push(`фикс = 57 390`);
+      lines.push(`базаДля1% = ${state.reg === "USN_6" ? "доход (taxBase)" : "доход−расход (налогБаза)"} = ${fmtNumber(s.baseForExtra)}`);
+      lines.push(`1% = min( max(базаДля1% − 300 000, 0) × 1%, 321 818 ) = ${fmtNumber(s.contribExtra)}`);
+      lines.push(`взносыИтого = фикс + 1% = ${fmtNumber(s.contribTotal)}`);
+
+      lines.push("");
+      lines.push("5) Налог после взносов:");
+      lines.push(`налогПосле = max(налогДо − взносыИтого, 0) = ${fmtNumber(s.mainAfter)}`);
+    }
+
+    lines.push("");
+    lines.push("Итого к уплате:");
+    lines.push(`итого = НДС + налогПосле + взносыИтого = ${fmtNumber(s.totalPayable)}`);
+
+    if (r.flip.enabled) {
+      lines.push("\n— Перекуп (после налогов) —");
+      lines.push(`выручка = ценаПродажи = ${fmtNumber(r.salePrice)}`);
+      lines.push(`затраты = покупка + доп = ${fmtNumber(parseMoney($("buyPrice").value))} + ${fmtNumber(parseMoney($("flipExtraExpenses").value))} = ${fmtNumber(r.flip.costs)}`);
+      lines.push(`налоги/взносы = итогоКУплате = ${fmtNumber(r.flip.taxes)}`);
+      lines.push(`прибыльПослеНалогов = выручка − затраты − налоги = ${fmtNumber(r.flip.profitNet)}`);
+      if (r.flip.aprNet !== null) lines.push(`% годовых = прибыль/затраты × (365/дней) × 100% = ${(r.flip.aprNet*100).toFixed(1)}%`);
+    }
+
+    return lines.join("\n");
+  }
+
+  function buildTextForCopy() {
+    const r = calcAll();
+    const s = r.sale;
+
+    const lines = [];
+    lines.push("RBMGROUP.RU");
+    lines.push("Калькулятор налогов — продажа коммерческой недвижимости (Санкт-Петербург)");
+    lines.push(`Цена продажи: ${fmtMoney(r.salePrice)}`);
+    lines.push(`Кадастровая стоимость: ${fmtMoney(r.cadastral)}`);
+    lines.push(`База для налогов (СПб): ${fmtMoney(s.taxBase)}`);
+    lines.push(`Диапазон выручки: ${bandHuman(state.band)}`);
+    lines.push(`НДС к уплате: ${fmtOutflow(s.vat)}`);
+    if (state.reg !== "OSNO") {
+      lines.push(`Налог (после взносов): ${fmtOutflow(s.mainAfter)}`);
+      lines.push(`Взносы ИП: ${fmtOutflow(s.contribTotal)}`);
+    } else {
+      lines.push(`Налог: ${fmtOutflow(s.mainAfter)}`);
+      lines.push(`Взносы ИП: — (в упрощённой модели не учтены)`);
+    }
+    lines.push(`ИТОГО к уплате: ${fmtOutflow(s.totalPayable)}`);
+    return lines.join("\n");
+  }
+
+  function render() {
+    const r = calcAll();
+    const s = r.sale;
+
+    // показать/скрыть строки взносов при ОСНО
+    const showContrib = (state.reg !== "OSNO");
+    $("contribRow1").style.display = showContrib ? "" : "none";
+    $("contribRow2").style.display = showContrib ? "" : "none";
+    $("contribRow3").style.display = showContrib ? "" : "none";
+
+    $("rTaxBase").textContent = fmtMoney(s.taxBase);
+    $("rVatRate").textContent = `${pct(s.vatRate)} (выручка: ${bandHuman(state.band)})`;
+
+    $("rVat").textContent = fmtOutflow(s.vat);
+    $("rMainTaxBefore").textContent = fmtOutflow(s.mainBefore);
+
+    $("rContribFixed").textContent = fmtOutflow(s.contribFixed);
+    $("rContribExtra").textContent = fmtOutflow(s.contribExtra);
+    $("rContribTotal").textContent = fmtOutflow(s.contribTotal);
+
+    $("rMainTaxAfter").textContent = fmtOutflow(s.mainAfter);
+    $("rTotalPayable").textContent = fmtOutflow(s.totalPayable);
+
+    // перекуп
+    $("rFlipStatus").textContent = (r.flip.enabled ? "включен" : "выключен");
+    $("rFlipRevenue").textContent = r.flip.enabled ? fmtInflow(r.flip.revenue) : "—";
+    $("rFlipCosts").textContent = r.flip.enabled ? fmtOutflow(r.flip.costs) : "—";
+    $("rFlipTaxes").textContent = r.flip.enabled ? fmtOutflow(r.flip.taxes) : "—";
+
+    const profitEl = $("rFlipProfitNet");
+    const aprEl = $("rFlipAPR");
+
+    if (r.flip.enabled) {
+      if (r.flip.profitNet >= 0) {
+        profitEl.textContent = fmtInflow(r.flip.profitNet);
+        profitEl.classList.remove("neg"); profitEl.classList.add("pos");
+      } else {
+        profitEl.textContent = fmtOutflow(Math.abs(r.flip.profitNet));
+        profitEl.classList.remove("pos"); profitEl.classList.add("neg");
+      }
+
+      if (r.flip.aprNet !== null) {
+        const txt = (r.flip.aprNet*100).toFixed(1) + "%";
+        aprEl.textContent = txt;
+        if (r.flip.aprNet >= 0) { aprEl.classList.add("pos"); aprEl.classList.remove("neg"); }
+        else { aprEl.classList.add("neg"); aprEl.classList.remove("pos"); }
+      } else {
+        aprEl.textContent = "—";
+        aprEl.classList.remove("pos","neg");
+      }
+    } else {
+      profitEl.textContent = "—";
+      profitEl.classList.remove("pos","neg");
+      aprEl.textContent = "—";
+      aprEl.classList.remove("pos","neg");
+    }
+
+    // формулы
+    if (state.showFormula) $("formulaBox").textContent = buildFormulaText(r);
+
+    // предупреждения
+    const warnings = [...s.warnings];
+    if (warnings.length) {
+      $("message").innerHTML = `<div class="warn"><b>Важно:</b><br>• ${warnings.join("<br>• ")}</div>`;
+    } else {
+      $("message").innerHTML = "";
+    }
+  }
+
+  // init
+  if (!$("flipDays").value) $("flipDays").value = "180";
+  $("flipDays").addEventListener("input", render);
+
+  // initial
+  applyRegimeRules();
+  render();
+</script>
+</body>
+</html>
