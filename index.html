@@ -104,9 +104,42 @@
 
     /* ✅ Мобилка: всегда fallback (чтобы не было белых полей от картинки) */
     @media(max-width:640px){
-      .topBanner img{display:none !important;}
-      .bannerFallback{display:flex !important;}
-    }
+  .wrap{padding:12px;}
+
+  .topBanner{
+    height:auto;
+    min-height:120px;
+  }
+
+  .topBanner img{
+    display:none !important;
+  }
+
+  .bannerFallback{
+    display:flex !important;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    padding:14px 14px;
+    gap:12px;
+  }
+
+  .bfTitle{
+    font-size:22px;
+    line-height:1.1;
+  }
+
+  .bfSub{
+    font-size:13px;
+  }
+
+  .bfBtn{
+    width:100%;
+    justify-content:center;
+    box-sizing:border-box;
+  }
+}
+
 
     /* tooltip */
     .qwrap{display:flex;align-items:center;gap:8px}
