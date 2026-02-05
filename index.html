@@ -1,21 +1,34 @@
+<!-- ✅ STABLE VERSION (fallback): 2026-02-05
+Если что-то ломается — откатываемся к этому файлу 1-в-1.
+-->
 <!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Калькулятор налогов при продаже коммерческой недвижимости в Санкт-Петербурге от RBMGROUP.RU</title>
+  <title>Калькулятор налогов при продаже коммерческой недвижимости (СПб) — RBMGROUP.RU</title>
   <style>
-    :root { --bg:#0b1220; --card:#111a2e; --muted:#97a3b6; --text:#e8eefc; --accent:#4aa3ff; --danger:#ff5b5b; --ok:#43d17a; }
+    :root{
+      --bg:#0b1220; --card:#111a2e; --muted:#97a3b6; --text:#e8eefc;
+      --accent:#4aa3ff; --danger:#ff5b5b; --ok:#43d17a;
+    }
     *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    body{margin:0;background:linear-gradient(180deg,#070b14, #0b1220);color:var(--text);}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    body{margin:0;background:linear-gradient(180deg,#070b14,#0b1220);color:var(--text);}
+    .wrap{max-width:1180px;margin:0 auto;padding:20px}
     h1{font-size:20px;margin:10px 0 18px}
     .grid{display:grid;grid-template-columns:1fr;gap:14px}
-    @media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
-    .card{background:rgba(17,26,46,.92);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,.25)}
+    @media(min-width:980px){.grid{grid-template-columns:1.15fr .85fr}}
+    .card{
+      background:rgba(17,26,46,.92);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:0 10px 25px rgba(0,0,0,.25)
+    }
     .row{display:grid;grid-template-columns:1fr;gap:10px}
     @media(min-width:640px){.row.two{grid-template-columns:1fr 1fr}}
     label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    .req::after{content:" *"; color:var(--accent); font-weight:700}
     input[type="text"]{
       width:100%;padding:12px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.18);color:var(--text);outline:none;
@@ -23,14 +36,18 @@
     input[disabled]{opacity:.55}
     .seg{display:flex;gap:8px;flex-wrap:wrap}
     .seg button{
-      border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
       padding:10px 12px;border-radius:10px;cursor:pointer;transition:.15s; font-size:13px;
     }
     .seg button.active{border-color:rgba(74,163,255,.9);box-shadow:0 0 0 3px rgba(74,163,255,.15)}
     .seg button:disabled{opacity:.35; cursor:not-allowed; border-color:rgba(255,255,255,.08); box-shadow:none;}
     .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:8px}
     .warn{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(255,91,91,.28);background:rgba(255,91,91,.08);color:#ffd3d3;font-size:13px;line-height:1.35}
-    .ok{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(67,209,122,.25);background:rgba(67,209,122,.08);color:#c8ffe0;font-size:13px}
+    .ok{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(67,209,122,.25);background:rgba(67,209,122,.08);color:#c8ffe0;font-size:13px;line-height:1.35}
+    .split{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+    .tag{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:var(--muted)}
     .result-line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
     .result-line:last-child{border-bottom:none}
     .k{color:var(--muted);font-size:13px}
@@ -38,145 +55,210 @@
     .pos{color:var(--ok)}
     .neg{color:var(--danger)}
     .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{
-      padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18);color:var(--text);cursor:pointer;
-    }
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);cursor:pointer;}
     .btn.primary{border-color:rgba(74,163,255,.7);background:rgba(74,163,255,.14)}
-    .small{font-size:12px;color:var(--muted)}
-    .split{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
-    .tag{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.12);color:var(--muted)}
-    .formula{
-      margin-top:10px;
-      padding:10px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.16);
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-      white-space:pre-wrap;
-    }
+    .formula{margin-top:10px;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.16);color:var(--muted);font-size:12px;line-height:1.45;white-space:pre-wrap;}
+    .expRow{display:grid;grid-template-columns:1.2fr .7fr auto;gap:8px;align-items:center;margin-top:8px}
+    .xbtn{border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:var(--text);padding:10px 10px;border-radius:10px;cursor:pointer;}
+    @media(max-width:520px){.expRow{grid-template-columns:1fr 1fr auto}}
+    details{border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px; background:rgba(0,0,0,.10)}
+    details summary{cursor:pointer; color:var(--muted); font-size:12px}
 
-    /* === Баннер: фикс белых полей (обрезка canvas) === */
     .topBanner{
-      display:block;
-      margin: 0 0 14px;
-      border-radius:14px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 10px 25px rgba(0,0,0,.25);
-      transition: transform .15s, box-shadow .15s;
-      text-decoration:none;
-
-      /* ключ: фиксированная высота */
-      height: 140px;
-      background:#0b1220;
+      display:block;margin:0 0 14px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 10px 25px rgba(0,0,0,.25);transition:.15s;text-decoration:none;height:140px;
+      position:relative;
+      background:
+        radial-gradient(900px 160px at 20% 50%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(90deg, rgba(0,0,0,.55), rgba(0,0,0,.18)),
+        linear-gradient(180deg, #0a1020, #070b14);
     }
+    .topBanner:hover{transform:translateY(-1px);box-shadow:0 14px 35px rgba(0,0,0,.35)}
     .topBanner img{
-      width:100%;
-      height:100%;
-      display:block;
+      width:100%;height:100%;display:none;object-fit:cover;object-position:center;
+      filter:saturate(1.05) contrast(1.05);
+    }
+    .bannerFallback{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px;
+      gap:16px;
+    }
+    .bfLeft{display:flex;flex-direction:column;gap:6px}
+    .bfTitle{font-size:30px;font-weight:850;letter-spacing:.6px}
+    .bfSub{color:rgba(232,238,252,.78);font-size:14px}
+    .bfBtn{
+      border:1px solid rgba(255,255,255,.25);
+      padding:10px 14px;border-radius:12px;
+      background:rgba(0,0,0,.25);
+      color:var(--text);
+      white-space:nowrap;
+      display:flex; align-items:center; gap:8px;
+    }
 
-      /* ключ: обрезаем белые поля */
-      object-fit: cover;
-      object-position: center;
+    .qwrap{display:flex;align-items:center;gap:8px}
+    .qmark{
+      width:18px;height:18px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      display:inline-flex;align-items:center;justify-content:center;
+      color:rgba(232,238,252,.75);
+      font-size:12px;cursor:help;position:relative;
+      background:rgba(0,0,0,.12);
     }
-    .topBanner:hover{transform: translateY(-1px); box-shadow:0 14px 35px rgba(0,0,0,.35)}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
+    .qmark:hover .tip{display:block}
+    .tip{
+      display:none; position:absolute; left:0; top:24px; z-index:10;
+      width:320px; max-width:70vw;
+      padding:10px 12px; border-radius:12px;
+      background:rgba(0,0,0,.86);
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.14);
-      padding:8px 10px;border-radius:12px;color:var(--muted);font-size:12px
-    }
-    .expRow{display:grid;grid-template-columns:1.3fr .7fr auto;gap:8px;align-items:center;margin-top:8px}
-    .expRow .xbtn{
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18);color:var(--text);
-      padding:10px 10px;border-radius:10px;cursor:pointer;
-    }
-    @media(max-width:520px){
-      .expRow{grid-template-columns:1fr 1fr auto}
+      color:rgba(232,238,252,.92);
+      font-size:12px; line-height:1.35;
+      box-shadow:0 10px 25px rgba(0,0,0,.4);
     }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <!-- Баннер -->
-    <a href="https://rbmgroup.ru" class="topBanner" target="_blank" rel="noopener">
-      <img src="rbm-banner.png" alt="RBMGROUP — вся коммерческая недвижимость Санкт-Петербурга">
-    </a>
+<div class="wrap">
 
-    <h1>Калькулятор налогов при продаже коммерческой недвижимости в Санкт-Петербурге от RBMGROUP.RU</h1>
+  <a class="topBanner" href="https://rbmgroup.ru/sale/" target="_blank" rel="noopener">
+    <img id="bannerImg" src="rbm-banner.png" alt="RBMGROUP — смотреть помещения">
+    <div id="bannerFallback" class="bannerFallback">
+      <div class="bfLeft">
+        <div class="bfTitle">RBMGROUP</div>
+        <div class="bfSub">Вся коммерческая недвижимость Санкт-Петербурга</div>
+      </div>
+      <div class="bfBtn">Смотреть помещения <span aria-hidden="true">→</span></div>
+    </div>
+  </a>
 
-    <div class="grid">
-      <!-- INPUTS -->
-      <div class="card">
-        <div class="row">
-          <div>
-            <label>Адрес объекта</label>
-            <input id="addr" type="text" placeholder="например: СПб, ул. Рубинштейна, 10" />
-          </div>
+  <h1>Калькулятор налогов при продаже коммерческой недвижимости в Санкт-Петербурге от RBMGROUP.RU</h1>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+
+      <div style="margin-bottom:10px">
+        <label>Кто продаёт?</label>
+        <div class="seg" id="sellerType">
+          <button data-seller="IP" class="active">ИП</button>
+          <button data-seller="PERSON">Физлицо</button>
+          <button data-seller="LLC">ООО</button>
         </div>
+      </div>
 
-        <div class="row two" style="margin-top:10px">
-          <div>
-            <label>Цена продажи, ₽</label>
-            <input id="salePrice" type="text" inputmode="numeric" placeholder="например 20 000 000" />
-          </div>
-          <div>
-            <label>Кадастровая стоимость, ₽</label>
-            <input id="cadastral" type="text" inputmode="numeric" placeholder="например 11 283 000" />
-          </div>
-        </div>
-
-        <div style="margin-top:14px">
-          <label>Годовая выручка после продажи (диапазон)</label>
-          <div class="seg" id="incomeBand">
-            <button data-band="A" class="active">до 20 млн</button>
-            <button data-band="B">20–250 млн</button>
-            <button data-band="C">250–450 млн</button>
-            <button data-band="D">&gt; 450 млн</button>
-          </div>
-        </div>
-
-        <div style="margin-top:14px">
-          <label>Налоговый режим ИП</label>
-          <div class="seg" id="taxRegime">
-            <button data-reg="USN_6" class="active">6% с доходов</button>
-            <button data-reg="USN_7">7% доходы − расходы</button>
-            <button data-reg="OSNO" style="display:none">ОСНО</button>
-          </div>
-          <div class="hint" id="osnoHint" style="display:none">
-            Выбран диапазон выручки &gt; 450 млн — требуется более индивидуальный подсчёт. Для упрощённой оценки применены ставки 10% (налог) и 10% (НДС).
-          </div>
-        </div>
-
-        <div style="margin-top:14px" id="expensesWrap" hidden>
-          <label>Расходы, ₽ (подтверждённые) — для режима 7%</label>
-          <input id="expenses" type="text" inputmode="numeric" placeholder="например 3 000 000 (или 0)" />
-          <div class="hint">Для УСН 7% база = max(доход − расходы, 0). Сюда автоматически добавятся “Доп. расходы” ниже.</div>
-        </div>
-
-        <div class="split"></div>
-
+      <div class="row">
         <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-            <div class="tag">Дополнительные расходы</div>
-            <button class="btn" id="addExpenseBtn">+ Добавить расход</button>
-          </div>
+          <label>Адрес объекта</label>
+          <input id="addr" type="text" placeholder="например: СПб, ул. Рубинштейна, 10">
+        </div>
+      </div>
 
-          <div id="extraExpensesList"></div>
-          <div class="hint">Эти расходы учитываются: (1) в “На руки”, (2) в режиме 7% (как расходы), (3) в режиме “перекуп”.</div>
+      <div class="row two" style="margin-top:10px">
+        <div>
+          <label class="req">Цена продажи, ₽</label>
+          <input id="salePrice" type="text" inputmode="numeric" placeholder="например 20 000 000">
+        </div>
+        <div>
+          <label class="req">Кадастровая стоимость, ₽</label>
+          <input id="cadastral" type="text" inputmode="numeric" placeholder="например 11 283 000">
+        </div>
+      </div>
+
+      <!-- Band: скрываем для физлица -->
+      <div style="margin-top:14px" id="bandWrap">
+        <label>Годовая выручка после продажи (диапазон)</label>
+        <div class="seg" id="incomeBand">
+          <button data-band="A" class="active">до 20 млн</button>
+          <button data-band="B">20–250 млн</button>
+          <button data-band="C">250–450 млн</button>
+          <button data-band="D">&gt; 450 млн</button>
+        </div>
+      </div>
+
+      <!-- PERSON BLOCK -->
+      <div id="personBlock" style="display:none;margin-top:14px">
+        <div class="qwrap">
+          <label style="margin:0">Велась предпринимательская деятельность?</label>
+          <span class="qmark">?
+            <span class="tip">
+              Предпринимательская деятельность — если помещение использовалось для бизнеса:
+              сдавалось как коммерция, там работал магазин/офис/кафе, оказывались услуги,
+              заключались договоры с клиентами и т.п.
+            </span>
+          </span>
+        </div>
+        <div class="seg" id="personBiz">
+          <button data-biz="YES" class="active">Да</button>
+          <button data-biz="NO">Нет</button>
         </div>
 
-        <div class="split"></div>
+        <div id="personNoBiz" style="margin-top:14px;display:none">
+          <label>Срок владения</label>
+          <div class="seg" id="ownTerm">
+            <button data-term="1_3" class="active">1–3 года</button>
+            <button data-term="3_5">3–5 лет</button>
+            <button data-term="GT5">&gt; 5 лет</button>
+          </div>
 
+          <div id="acqWrap" style="margin-top:14px">
+            <label>Как получен объект?</label>
+            <div class="seg" id="acqType">
+              <button data-acq="inherit" class="active">наследство</button>
+              <button data-acq="priv">приватизация</button>
+              <button data-acq="rent">пожизненное содержание</button>
+              <button data-acq="gift">дарение (близкий)</button>
+              <button data-acq="other">другое</button>
+            </div>
+            <div class="hint">Льготные способы дают минимальный срок 3 года. Если “другое” — обычно 5 лет.</div>
+          </div>
+        </div>
+
+        <div class="warn" id="personBizWarn" style="display:none">
+          Если деятельность велась, налог при продаже (НДФЛ) оплачивается обязательно. Ниже показываем расчёт НДФЛ.
+        </div>
+      </div>
+
+      <!-- IP/LLC TAX REGIME -->
+      <div style="margin-top:14px" id="taxRegimeWrap">
+        <label id="taxRegimeTitle">Налоговый режим</label>
+        <div class="seg" id="taxRegime">
+          <button data-reg="USN_6" class="active">6% с доходов</button>
+          <button data-reg="USN_7">7% доходы − расходы</button>
+          <button data-reg="OSNO" style="display:none">ОСНО</button>
+        </div>
+        <div class="hint" id="osnoHint" style="display:none">
+          Выбран диапазон выручки &gt; 450 млн — требуется более индивидуальный подсчёт. Здесь применены ставки 10% (налог) и 10% (НДС).
+        </div>
+
+        <div class="hint" id="llcModeHint" style="display:none"></div>
+      </div>
+
+      <div style="margin-top:14px" id="expensesWrap" hidden>
+        <label>Подтвержденные расходы для режима 7%, ₽</label>
+        <input id="expenses" type="text" inputmode="numeric" placeholder="например 3 000 000 (или 0)">
+        <div class="hint">Эти расходы уменьшают налоговую базу только в режиме 7%.</div>
+      </div>
+
+      <div class="split"></div>
+
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div class="tag">Дополнительные расходы</div>
+          <button class="btn" id="addExpenseBtn" type="button">+ Добавить</button>
+        </div>
+        <div id="extraExpensesList"></div>
+      </div>
+
+      <div class="split"></div>
+
+      <!-- "перекуп" переименован -->
+      <div id="flipWrap">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div>
-            <div class="tag">Режим “перекуп”</div>
-            <div class="hint" style="margin-top:6px">Прибыль и % годовых считаются после всех налогов. Прибыль — по цене продажи. Кадастр влияет только на налоги.</div>
+            <div class="tag">Краткосрочный инвестор</div>
+            <div class="hint" style="margin-top:6px">Прибыль и % годовых считаются после налогов. Прибыль — по цене продажи.</div>
           </div>
           <div class="seg" id="flipToggle">
             <button data-flip="OFF" class="active">Выключен</button>
@@ -188,143 +270,169 @@
           <div class="row two">
             <div>
               <label>Цена покупки, ₽</label>
-              <input id="buyPrice" type="text" inputmode="numeric" placeholder="например 18 000 000" />
+              <input id="buyPrice" type="text" inputmode="numeric" placeholder="например 18 000 000">
             </div>
             <div>
               <label>Дней реализации (по умолчанию 180)</label>
-              <input id="flipDays" type="text" inputmode="numeric" placeholder="180" />
+              <input id="flipDays" type="text" inputmode="numeric" placeholder="180">
             </div>
           </div>
 
-          <div class="row two" style="margin-top:10px">
+          <div class="row" style="margin-top:10px">
             <div>
-              <label>Доп. расходы перекупа, ₽ (ремонт/сделка и т.п.)</label>
-              <input id="flipExtraExpenses" type="text" inputmode="numeric" placeholder="например 200 000 (или 0)" />
-            </div>
-            <div>
-              <label>% годовых (после налогов)</label>
-              <input id="flipApr" type="text" disabled value="—" />
+              <label>Доход от арендатора за период, ₽</label>
+              <input id="rentIncome" type="text" inputmode="numeric" placeholder="например 900 000 (или 0)">
             </div>
           </div>
+
+          <div class="split"></div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div class="tag">Расходы инвестора</div>
+            <button class="btn" id="addFlipExpenseBtn" type="button">+ Добавить</button>
+          </div>
+          <div id="flipExpensesList"></div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn" id="resetBtn" type="button">Сброс</button>
+      </div>
+
+      <div class="hint" style="margin-top:12px">Пересчёт автоматически при любом изменении (после заполнения обязательных полей).</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="card">
+      <div class="k">Результат</div>
+
+      <div class="ok" id="needFieldsBox" style="margin-top:10px">
+        Заполните обязательные поля со звёздочкой: <b>Цена продажи</b> и <b>Кадастровая стоимость</b>.
+      </div>
+
+      <div id="computedBox" hidden style="margin-top:10px">
+
+        <div class="result-line"><div class="k">База для налогов (min база)</div><div class="v" id="rTaxBase">—</div></div>
+
+        <div id="lineConfirmedExpenses" style="display:none" class="result-line">
+          <div class="k">Подтвержденные расходы (для 7%)</div><div class="v pos" id="rConfirmedExpenses">—</div>
+        </div>
+
+        <div id="vatLines">
+          <div class="result-line"><div class="k">Ставка НДС</div><div class="v" id="rVatRate">—</div></div>
+          <div class="result-line"><div class="k">НДС к уплате</div><div class="v neg" id="rVat">—</div></div>
+        </div>
+
+        <div class="split" id="splitIpOrLlc"></div>
+
+        <div id="ipOrLlcTaxBlock">
+          <div class="result-line"><div class="k">Налог (до зачёта взносов)</div><div class="v neg" id="rMainTaxBefore">—</div></div>
+          <div class="result-line" id="lineCredit"><div class="k">Компенсация за счёт взносов (зачёт)</div><div class="v pos" id="rCredit">—</div></div>
+
+          <div id="contribBlock">
+            <div class="result-line"><div class="k">Взносы (фикс. 2026)</div><div class="v neg" id="rContribFixed">—</div></div>
+            <div class="result-line"><div class="k">Взносы (1% свыше 300k)</div><div class="v neg" id="rContribExtra">—</div></div>
+            <div class="result-line"><div class="k">Взносы (итого)</div><div class="v neg" id="rContribTotal">—</div></div>
+          </div>
+
+          <div class="result-line"><div class="k">Налог к уплате</div><div class="v neg" id="rMainTaxAfter">—</div></div>
+        </div>
+
+        <div id="personTaxBlock" style="display:none">
+          <div class="result-line"><div class="k">НДФЛ</div><div class="v neg" id="rNdfl">—</div></div>
+        </div>
+
+        <div class="result-line"><div class="k">Дополнительные расходы (итого)</div><div class="v neg" id="rExtraCosts">—</div></div>
+
+        <details id="extraDetails" style="margin-top:10px; display:none">
+          <summary>Показать список доп. расходов</summary>
+          <div id="extraItems" class="hint" style="margin-top:8px"></div>
+        </details>
+
+        <div class="split"></div>
+
+        <div class="result-line"><div class="k">Итого к уплате государству</div><div class="v neg" id="rTotalPayable">—</div></div>
+        <div class="result-line"><div class="k">На руки (после налогов и расходов)</div><div class="v pos" id="rNetHands">—</div></div>
+
+        <div id="advisorBox"></div>
+
+        <div id="flipResults" hidden>
+          <div class="split"></div>
+          <div class="result-line"><div class="k">Доход аренды (за период)</div><div class="v pos" id="rRentIncome">—</div></div>
+          <div class="result-line"><div class="k">Прибыль инвестора (после налогов)</div><div class="v" id="rFlipProfit">—</div></div>
+          <div class="result-line"><div class="k">% годовых (после налогов)</div><div class="v" id="rFlipAPR">—</div></div>
         </div>
 
         <div class="btns">
-          <button class="btn" id="resetBtn">Сброс</button>
-          <div class="pill" title="Ссылка обновляется автоматически — можно копировать из адресной строки">
-            🔗 Ссылка с расчётом: обновляется автоматически
-          </div>
+          <button class="btn primary" id="toggleFormulaBtn" type="button">Показать формулы</button>
+          <button class="btn" id="copyBtn" type="button">Скопировать расчёт</button>
+          <button class="btn" id="copyLinkBtn" type="button">Скопировать ссылку</button>
         </div>
 
-        <div class="hint" style="margin-top:12px">
-          Пересчёт выполняется автоматически при любом изменении.
-        </div>
-      </div>
-
-      <!-- RESULT -->
-      <div class="card">
-        <div class="small">Результат</div>
-
-        <div style="margin-top:10px">
-          <div class="result-line"><div class="k">База для налогов (СПб)</div><div class="v" id="rTaxBase">—</div></div>
-
-          <div class="result-line"><div class="k">Ставка НДС</div><div class="v" id="rVatRate">—</div></div>
-          <div class="result-line"><div class="k">НДС к уплате</div><div class="v neg" id="rVat">—</div></div>
-
-          <div class="split"></div>
-
-          <div class="result-line"><div class="k">Налог с продажи (до зачёта взносов)</div><div class="v neg" id="rMainTaxBefore">—</div></div>
-
-          <div class="result-line" id="contribRow0"><div class="k">Компенсация за счёт взносов ИП (зачёт)</div><div class="v pos" id="rContribCredit">—</div></div>
-
-          <div class="result-line" id="contribRow1"><div class="k">Взносы ИП (фикс. 2026)</div><div class="v neg" id="rContribFixed">—</div></div>
-          <div class="result-line" id="contribRow2"><div class="k">Взносы ИП (1% свыше 300k)</div><div class="v neg" id="rContribExtra">—</div></div>
-          <div class="result-line" id="contribRow3"><div class="k">Взносы ИП (итого)</div><div class="v neg" id="rContribTotal">—</div></div>
-
-          <div class="result-line"><div class="k">Налог к уплате (после зачёта взносов)</div><div class="v neg" id="rMainTaxAfter">—</div></div>
-
-          <div class="split"></div>
-
-          <div class="result-line"><div class="k">Итого к уплате государству (НДС + налог + взносы)</div><div class="v neg" id="rTotalPayable">—</div></div>
-          <div class="result-line"><div class="k">На руки (после всех налогов и расходов)</div><div class="v pos" id="rNetHands">—</div></div>
-
-          <div class="hint" id="bandDeltaHint" style="margin-top:10px"></div>
-
-          <div class="split"></div>
-
-          <div id="flipResults" hidden>
-            <div class="result-line"><div class="k">“Перекуп”</div><div class="v" id="rFlipStatus">—</div></div>
-            <div class="result-line"><div class="k">Выручка (цена продажи)</div><div class="v pos" id="rFlipRevenue">—</div></div>
-            <div class="result-line"><div class="k">Затраты (покупка + доп.)</div><div class="v neg" id="rFlipCosts">—</div></div>
-            <div class="result-line"><div class="k">Налоги/взносы при перепродаже</div><div class="v neg" id="rFlipTaxes">—</div></div>
-            <div class="result-line"><div class="k">Прибыль перекупа (после налогов)</div><div class="v" id="rFlipProfitNet">—</div></div>
-            <div class="result-line"><div class="k">% годовых (после налогов)</div><div class="v" id="rFlipAPR">—</div></div>
-            <div class="split"></div>
-          </div>
-
-          <div class="btns">
-            <button class="btn primary" id="toggleFormulaBtn">Показать формулы</button>
-            <button class="btn" id="copyBtn">Скопировать расчёт</button>
-            <button class="btn" id="copyLinkBtn">Скопировать ссылку</button>
-          </div>
-
-          <div id="formulaBox" class="formula" hidden>—</div>
-        </div>
-
-        <div id="message"></div>
+        <div id="formulaBox" class="formula" hidden></div>
+        <div id="message" style="margin-top:10px"></div>
       </div>
     </div>
   </div>
+</div>
 
 <script>
+  // ✅ STABLE VERSION (fallback): 2026-02-05
+  const APP_VERSION = "stable-2026-02-05";
+
   const $ = (id) => document.getElementById(id);
 
-  // ====== ВЗНОСЫ ИП 2026 ======
+  const bannerImg = $("bannerImg");
+  bannerImg.addEventListener("load", () => {
+    bannerImg.style.display = "block";
+    $("bannerFallback").style.display = "none";
+  });
+  bannerImg.addEventListener("error", () => {
+    bannerImg.style.display = "none";
+    $("bannerFallback").style.display = "flex";
+  });
+
   const FIXED_IP_CONTRIB_2026 = 57390;
   const EXTRA_RATE = 0.01;
   const EXTRA_THRESHOLD = 300000;
   const EXTRA_CAP = 321818;
 
-  // ====== ОСНО (упрощённо для >450 млн) ======
-  const OSNO_TAX_RATE = 0.10; // налог
-  const OSNO_VAT_RATE = 0.10; // НДС
+  const OSNO_TAX_RATE = 0.10;
+  const OSNO_VAT_RATE = 0.10;
 
-  // ====== state ======
+  const NDFL_13_LIMIT = 5_000_000;
+  const NDFL_13 = 0.13;
+  const NDFL_15 = 0.15;
+
   let state = {
-    band: "A",
-    reg: "USN_6",
+    seller: "IP",        // IP | PERSON | LLC
+    band: "A",           // A,B,C,D
+    reg: "USN_6",        // USN_6 | USN_7 | OSNO
     flip: "OFF",
     showFormula: false,
-    extraExpenses: []
+    extraExpenses: [],
+    flipExpenses: [],
+    personBiz: "YES",    // YES|NO
+    ownTerm: "1_3",      // 1_3|3_5|GT5
+    acq: "inherit"       // inherit|priv|rent|gift|other
   };
 
-  // ====== helpers ======
   function parseMoney(str) {
-    if (str == null) return 0;
-    const cleaned = String(str).replace(/[^\d.]/g, "");
-    if (!cleaned) return 0;
-    return Number(cleaned);
+    const cleaned = String(str ?? "").replace(/[^\d]/g, "");
+    return cleaned ? Number(cleaned) : 0;
   }
   function fmtInt(n){
     if (!isFinite(n)) return "—";
     return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   }
-  function fmtMoney(n) {
-    if (!isFinite(n)) return "—";
-    return fmtInt(n) + " ₽";
-  }
+  function fmtMoney(n){ return isFinite(n) ? (fmtInt(n) + " ₽") : "—"; }
   function outflow(n){ return "− " + fmtMoney(n); }
   function inflow(n){ return fmtMoney(n); }
   function plus(n){ return "+ " + fmtMoney(n); }
-  function pct(x){ return (x*100).toFixed(0) + "%"; }
-
-  function bandHuman(band){
-    return ({A:"до 20 млн",B:"20–250 млн",C:"250–450 млн",D:"> 450 млн"})[band] || "—";
-  }
 
   function formatInputThousands(input) {
     const raw = input.value.replace(/[^\d]/g, "");
-    if (!raw) { input.value = ""; return; }
-    input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    input.value = raw ? raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ") : "";
   }
 
   function setActive(containerId, attr, value) {
@@ -334,446 +442,132 @@
     });
   }
 
-  // ====== Extra expenses UI ======
-  function sumExtraExpenses(){
-    return state.extraExpenses.reduce((s,x)=>s + (Number(x.amount)||0), 0);
-  }
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, (m)=>({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
   }
-  function renderExtraExpenses(){
-    const box = $("extraExpensesList");
+
+  function renderExpenseList(containerId, list){
+    const box = $(containerId);
     box.innerHTML = "";
-    state.extraExpenses.forEach((e, idx) => {
+    list.forEach((e, idx) => {
       const row = document.createElement("div");
       row.className = "expRow";
       row.innerHTML = `
-        <input type="text" data-exp-name="${idx}" placeholder="Название расхода" value="${escapeHtml(e.name || "")}">
-        <input type="text" data-exp-amt="${idx}" inputmode="numeric" placeholder="Сумма, ₽" value="${e.amount ? fmtInt(e.amount) : ""}">
-        <button class="xbtn" data-exp-del="${idx}" title="Удалить">✕</button>
+        <input type="text" data-name="${idx}" placeholder="Название расхода" value="${escapeHtml(e.name||"")}">
+        <input type="text" data-amt="${idx}" inputmode="numeric" placeholder="Сумма, ₽" value="${e.amount ? fmtInt(e.amount) : ""}">
+        <button class="xbtn" data-del="${idx}" type="button">✕</button>
       `;
       box.appendChild(row);
     });
 
-    box.querySelectorAll("[data-exp-name]").forEach(inp=>{
+    box.querySelectorAll("[data-name]").forEach(inp=>{
       inp.addEventListener("input", (ev)=>{
-        const i = Number(ev.target.getAttribute("data-exp-name"));
-        state.extraExpenses[i].name = ev.target.value;
+        const i = Number(ev.target.getAttribute("data-name"));
+        list[i].name = ev.target.value;
         render();
       });
     });
-    box.querySelectorAll("[data-exp-amt]").forEach(inp=>{
+    box.querySelectorAll("[data-amt]").forEach(inp=>{
       inp.addEventListener("input", (ev)=>{
         formatInputThousands(ev.target);
-        const i = Number(ev.target.getAttribute("data-exp-amt"));
-        state.extraExpenses[i].amount = parseMoney(ev.target.value);
+        const i = Number(ev.target.getAttribute("data-amt"));
+        list[i].amount = parseMoney(ev.target.value);
         render();
       });
     });
-    box.querySelectorAll("[data-exp-del]").forEach(btn=>{
+    box.querySelectorAll("[data-del]").forEach(btn=>{
       btn.addEventListener("click", (ev)=>{
-        const i = Number(ev.target.getAttribute("data-exp-del"));
-        state.extraExpenses.splice(i,1);
-        renderExtraExpenses();
+        const i = Number(ev.target.getAttribute("data-del"));
+        list.splice(i,1);
+        renderExpenseList(containerId, list);
         render();
       });
     });
   }
+  function sumList(list){ return list.reduce((s,x)=>s + (Number(x.amount)||0), 0); }
 
-  $("addExpenseBtn").addEventListener("click", ()=>{
-    state.extraExpenses.push({name:"", amount:0});
-    renderExtraExpenses();
-    render();
-  });
+  function requiredReady(){
+    const sale = parseMoney($("salePrice").value);
+    const cad  = parseMoney($("cadastral").value);
+    return sale > 0 && cad > 0;
+  }
 
-  // ====== доходные диапазоны: блокировка по базе для налогов ======
-  function updateBandAvailability(taxBase) {
+  function autoBandByBase(taxBase){
+    if (taxBase <= 20_000_000) return "A";
+    if (taxBase <= 250_000_000) return "B";
+    if (taxBase <= 450_000_000) return "C";
+    return "D";
+  }
+
+  function updateBandAvailability(taxBase){
     const btnA = $("incomeBand").querySelector('button[data-band="A"]');
     const btnB = $("incomeBand").querySelector('button[data-band="B"]');
     const btnC = $("incomeBand").querySelector('button[data-band="C"]');
-    const btnD = $("incomeBand").querySelector('button[data-band="D"]');
 
-    const over20 = taxBase > 20_000_000;
-    const over250 = taxBase > 250_000_000;
-    const over450 = taxBase > 450_000_000;
+    btnA.disabled = (taxBase > 20_000_000);
+    btnB.disabled = (taxBase > 250_000_000);
+    btnC.disabled = (taxBase > 450_000_000);
 
-    btnA.disabled = over20;
-    btnB.disabled = over250;
-    btnC.disabled = over450;
-    btnD.disabled = false;
-
-    const cur = state.band;
-    if ((cur === "A" && btnA.disabled) || (cur === "B" && btnB.disabled) || (cur === "C" && btnC.disabled)) {
+    if ((state.band==="A" && btnA.disabled) || (state.band==="B" && btnB.disabled) || (state.band==="C" && btnC.disabled)){
       if (!btnB.disabled) state.band = "B";
       else if (!btnC.disabled) state.band = "C";
       else state.band = "D";
-      setActive("incomeBand", "data-band", state.band);
+      setActive("incomeBand","data-band",state.band);
     }
-
-    if (over450 && state.band !== "D") {
+    if (taxBase > 450_000_000 && state.band !== "D"){
       state.band = "D";
-      setActive("incomeBand", "data-band", "D");
+      setActive("incomeBand","data-band","D");
     }
   }
 
-  // ====== режимы: логика появления ОСНО при D ======
-  function applyRegimeRules() {
+  function applyOsnoRules(){
     const isD = (state.band === "D");
-
     const btn6 = $("taxRegime").querySelector('button[data-reg="USN_6"]');
     const btn7 = $("taxRegime").querySelector('button[data-reg="USN_7"]');
     const btnO = $("taxRegime").querySelector('button[data-reg="OSNO"]');
-    const osnoHint = $("osnoHint");
 
-    if (isD) {
+    // 1) Физлицо: подтверждённых расходов нет и режимы не нужны
+    if (state.seller === "PERSON"){
+      $("taxRegimeWrap").style.display = "none";
+      $("expensesWrap").hidden = true;
+      $("expenses").value = "";
+      return;
+    } else {
+      $("taxRegimeWrap").style.display = "";
+    }
+
+    if (isD){
       btnO.style.display = "";
       btn6.disabled = true;
       btn7.disabled = true;
-      btnO.disabled = false;
-
       state.reg = "OSNO";
       setActive("taxRegime","data-reg","OSNO");
-
       $("expensesWrap").hidden = true;
-      osnoHint.style.display = "";
+      $("osnoHint").style.display = "";
     } else {
       btnO.style.display = "none";
       btn6.disabled = false;
       btn7.disabled = false;
-
-      if (state.reg === "OSNO") {
+      if (state.reg === "OSNO"){
         state.reg = "USN_6";
         setActive("taxRegime","data-reg","USN_6");
       }
-
-      $("expensesWrap").hidden = (state.reg === "USN_6");
-      osnoHint.style.display = "none";
-    }
-  }
-
-  // ====== events ======
-  ["salePrice","cadastral","expenses","buyPrice","flipExtraExpenses","flipDays"].forEach(id=>{
-    const el = $(id);
-    if(!el) return;
-    el.addEventListener("input", ()=>{
-      formatInputThousands(el);
-      render();
-    });
-  });
-
-  $("addr").addEventListener("input", render);
-
-  $("incomeBand").addEventListener("click", (e) => {
-    const b = e.target?.getAttribute?.("data-band");
-    if (!b || e.target.disabled) return;
-    state.band = b;
-    setActive("incomeBand", "data-band", b);
-    applyRegimeRules();
-    render();
-  });
-
-  $("taxRegime").addEventListener("click", (e) => {
-    const r = e.target?.getAttribute?.("data-reg");
-    if (!r) return;
-    if (state.band === "D") return;
-
-    state.reg = r;
-    setActive("taxRegime", "data-reg", r);
-    $("expensesWrap").hidden = (r === "USN_6");
-    render();
-  });
-
-  $("flipToggle").addEventListener("click", (e) => {
-    const f = e.target?.getAttribute?.("data-flip");
-    if (!f) return;
-    state.flip = f;
-    setActive("flipToggle", "data-flip", f);
-    $("flipBlock").hidden = (f === "OFF");
-    $("flipResults").hidden = (f === "OFF");
-    render();
-  });
-
-  $("toggleFormulaBtn").addEventListener("click", () => {
-    state.showFormula = !state.showFormula;
-    $("formulaBox").hidden = !state.showFormula;
-    $("toggleFormulaBtn").textContent = state.showFormula ? "Скрыть формулы" : "Показать формулы";
-    render();
-  });
-
-  $("resetBtn").addEventListener("click", () => {
-    $("addr").value = "";
-    $("salePrice").value = "";
-    $("cadastral").value = "";
-    $("expenses").value = "";
-
-    $("buyPrice").value = "";
-    $("flipExtraExpenses").value = "";
-    $("flipDays").value = "180";
-    $("flipApr").value = "—";
-
-    state.extraExpenses = [];
-    renderExtraExpenses();
-
-    state.band = "A";
-    state.reg = "USN_6";
-    state.flip = "OFF";
-    setActive("incomeBand","data-band","A");
-    setActive("taxRegime","data-reg","USN_6");
-    setActive("flipToggle","data-flip","OFF");
-
-    $("expensesWrap").hidden = true;
-    $("flipBlock").hidden = true;
-    $("flipResults").hidden = true;
-
-    state.showFormula = false;
-    $("formulaBox").hidden = true;
-    $("toggleFormulaBtn").textContent = "Показать формулы";
-
-    $("message").innerHTML = "";
-    applyRegimeRules();
-    render();
-  });
-
-  // ====== calc ======
-  function calcSale({salePrice, cadastral, band, regime, expenses}) {
-    const warnings = [];
-    const taxBase = Math.max(salePrice, cadastral);
-
-    if (salePrice > 0 && cadastral > 0 && salePrice < cadastral) {
-      warnings.push("СПб: цена ниже кадастровой — для налогов берём кадастровую стоимость.");
-    }
-    if (band === "D") {
-      warnings.push("Выбран диапазон выручки > 450 млн — требуется более индивидуальный подсчёт. Здесь применена упрощённая оценка (10% налог и 10% НДС).");
+      $("expensesWrap").hidden = !(state.reg==="USN_7");
+      $("osnoHint").style.display = "none";
     }
 
-    let vatRate = 0;
-    let mainRate = 0;
-    let mainTaxBase = taxBase;
-
-    if (regime === "OSNO") {
-      vatRate = OSNO_VAT_RATE;
-      mainRate = OSNO_TAX_RATE;
-      mainTaxBase = taxBase;
+    if (state.seller === "LLC"){
+      $("taxRegimeTitle").textContent = "Налоговый режим ООО";
+      $("llcModeHint").style.display = "";
+      $("llcModeHint").textContent = (state.reg === "OSNO")
+        ? "ООО на ОСНО: здесь используется упрощённый расчёт (10% налог + 10% НДС). Обычно требуется индивидуальный расчёт (прибыль, входной НДС, расходы)."
+        : "ООО на УСН: применяем расчёт как для УСН (6%/7%) + НДС по диапазону выручки, как в калькуляторе.";
     } else {
-      vatRate = (band === "A") ? 0 : (band === "B" ? 0.05 : 0.07);
-      if (regime === "USN_6") {
-        mainRate = 0.06;
-        mainTaxBase = taxBase;
-      } else {
-        mainRate = 0.07;
-        mainTaxBase = Math.max(taxBase - expenses, 0);
-      }
+      $("taxRegimeTitle").textContent = "Налоговый режим";
+      $("llcModeHint").style.display = "none";
     }
-
-    const vat = taxBase * vatRate;
-    const mainBefore = mainTaxBase * mainRate;
-
-    let contribFixed = 0, contribExtra = 0, contribTotal = 0, baseForExtra = 0;
-    let credit = 0;
-    let mainAfter = mainBefore;
-
-    if (regime !== "OSNO") {
-      contribFixed = FIXED_IP_CONTRIB_2026;
-      baseForExtra = (regime === "USN_6") ? taxBase : mainTaxBase;
-
-      contribExtra = Math.max(baseForExtra - EXTRA_THRESHOLD, 0) * EXTRA_RATE;
-      contribExtra = Math.min(contribExtra, EXTRA_CAP);
-
-      contribTotal = contribFixed + contribExtra;
-
-      credit = Math.min(contribTotal, mainBefore);
-      mainAfter = Math.max(mainBefore - credit, 0);
-    }
-
-    const totalPayable = vat + mainAfter + contribTotal;
-
-    return {
-      taxBase,
-      vatRate, vat,
-      mainRate, mainTaxBase,
-      mainBefore, mainAfter,
-      contribFixed, contribExtra, contribTotal,
-      credit,
-      totalPayable,
-      warnings,
-      baseForExtra
-    };
-  }
-
-  function nearestBandDeltaText(rBase, baseInputs){
-    const {salePrice, cadastral, regime, expenses} = baseInputs;
-    const thresholds = [
-      {band:"A", next:"B", t:20_000_000},
-      {band:"B", next:"C", t:250_000_000},
-      {band:"C", next:"D", t:450_000_000}
-    ];
-
-    function calcTotalForBand(band){
-      let reg = regime;
-      if (band === "D") reg = "OSNO";
-      return calcSale({salePrice, cadastral, band, regime: reg, expenses}).totalPayable;
-    }
-
-    const curBand = state.band;
-    if (curBand === "D") return "";
-
-    const row = thresholds.find(x=>x.band===curBand) || thresholds.find(x=>x.next===curBand);
-    if(!row) return "";
-
-    const curTotal = calcTotalForBand(curBand);
-
-    if (curBand === row.band){
-      const nextTotal = calcTotalForBand(row.next);
-      const diff = nextTotal - curTotal;
-      if (diff > 0.5) {
-        return `<span class="neg">При превышении выручки ${fmtInt(row.t)} ₽ итог к уплате увеличится на ${fmtInt(diff)} ₽</span>`;
-      }
-      return "";
-    }
-
-    if (curBand === row.next && rBase <= row.t){
-      const prevTotal = calcTotalForBand(row.band);
-      const diff = curTotal - prevTotal;
-      if (diff > 0.5) {
-        return `<span class="pos">Если выручка окажется ≤ ${fmtInt(row.t)} ₽ итог к уплате снизится на ${fmtInt(diff)} ₽</span>`;
-      }
-    }
-    return "";
-  }
-
-  function calcAll() {
-    const salePrice = parseMoney($("salePrice").value);
-    const cadastral = parseMoney($("cadastral").value);
-    const manualExpenses = parseMoney($("expenses").value);
-
-    const extra = sumExtraExpenses();
-    const expenses = (state.reg === "USN_7") ? (manualExpenses + extra) : 0;
-
-    const taxBasePreview = Math.max(salePrice, cadastral);
-    updateBandAvailability(taxBasePreview);
-    applyRegimeRules();
-
-    const sale = calcSale({
-      salePrice,
-      cadastral,
-      band: state.band,
-      regime: state.reg,
-      expenses
-    });
-
-    const totalExtraCosts = extra;
-    const netHands = salePrice - sale.totalPayable - totalExtraCosts;
-
-    const flipEnabled = (state.flip === "ON");
-    const buyPrice = parseMoney($("buyPrice").value);
-    const flipExtraCosts = parseMoney($("flipExtraExpenses").value);
-    const days = Math.max(parseMoney($("flipDays").value) || 180, 1);
-
-    let flip = { enabled: flipEnabled, days, revenue:0, costs:0, taxes:0, profitNet:0, aprNet:null };
-
-    if (flipEnabled) {
-      const revenue = salePrice;
-      const costs = buyPrice + flipExtraCosts + totalExtraCosts;
-      const taxes = sale.totalPayable;
-      const profitNet = revenue - costs - taxes;
-
-      flip.revenue = revenue;
-      flip.costs = costs;
-      flip.taxes = taxes;
-      flip.profitNet = profitNet;
-
-      if (costs > 0) {
-        const apr = (profitNet / costs) * (365 / days);
-        flip.aprNet = apr;
-        $("flipApr").value = (apr * 100).toFixed(1) + "%";
-      } else {
-        $("flipApr").value = "—";
-      }
-    } else {
-      $("flipApr").value = "—";
-    }
-
-    return { addr: $("addr").value || "", salePrice, cadastral, expensesManual: manualExpenses, extraCosts: totalExtraCosts, expenses, sale, flip, netHands };
-  }
-
-  function buildFormulaText(r) {
-    const s = r.sale;
-    const salePrice = r.salePrice;
-    const cad = r.cadastral;
-
-    const lines = [];
-    lines.push("1) База для налогов (СПб):");
-    lines.push(`taxBase = max(ценаПродажи, кадастр) = max(${fmtInt(salePrice)}, ${fmtInt(cad)}) = ${fmtInt(s.taxBase)}`);
-
-    lines.push("");
-    lines.push("2) НДС к уплате:");
-    lines.push(`НДС = taxBase × ставкаНДС = ${fmtInt(s.taxBase)} × ${pct(s.vatRate)} = ${fmtInt(s.vat)}`);
-
-    lines.push("");
-    lines.push("3) Налог с продажи (до зачёта взносов):");
-    if (state.reg === "USN_6") {
-      lines.push(`налогБаза = taxBase = ${fmtInt(s.taxBase)}`);
-      lines.push(`налогДо = налогБаза × 6% = ${fmtInt(s.mainBefore)}`);
-    } else if (state.reg === "USN_7") {
-      lines.push(`расходы = ручные + допРасходы = ${fmtInt(r.expensesManual)} + ${fmtInt(r.extraCosts)} = ${fmtInt(r.expenses)}`);
-      lines.push(`налогБаза = max(taxBase − расходы, 0) = max(${fmtInt(s.taxBase)} − ${fmtInt(r.expenses)}, 0) = ${fmtInt(s.mainTaxBase)}`);
-      lines.push(`налогДо = налогБаза × 7% = ${fmtInt(s.mainBefore)}`);
-    } else {
-      lines.push(`(упрощение) налогБаза = taxBase = ${fmtInt(s.taxBase)}`);
-      lines.push(`налогДо = налогБаза × 10% = ${fmtInt(s.mainBefore)}`);
-    }
-
-    if (state.reg !== "OSNO") {
-      lines.push("");
-      lines.push("4) Взносы ИП 2026:");
-      lines.push(`фикс = 57 390`);
-      lines.push(`базаДля1% = ${state.reg === "USN_6" ? "доход (taxBase)" : "доход−расход (налогБаза)"} = ${fmtInt(s.baseForExtra)}`);
-      lines.push(`1% = min( max(базаДля1% − 300 000, 0) × 1%, 321 818 ) = ${fmtInt(s.contribExtra)}`);
-      lines.push(`взносыИтого = фикс + 1% = ${fmtInt(s.contribTotal)}`);
-
-      lines.push("");
-      lines.push("5) Компенсация (зачёт) и налог к уплате:");
-      lines.push(`зачёт = min(взносыИтого, налогДо) = ${fmtInt(s.credit)}`);
-      lines.push(`налогКУплате = max(налогДо − зачёт, 0) = ${fmtInt(s.mainAfter)}`);
-    }
-
-    lines.push("");
-    lines.push("6) Итого к уплате государству:");
-    lines.push(`итого = НДС + налогКУплате + взносыИтого = ${fmtInt(s.totalPayable)}`);
-
-    lines.push("");
-    lines.push("7) На руки:");
-    lines.push(`наРуки = ценаПродажи − итого − допРасходы = ${fmtInt(r.salePrice)} − ${fmtInt(s.totalPayable)} − ${fmtInt(r.extraCosts)} = ${fmtInt(r.netHands)}`);
-
-    if (r.flip.enabled) {
-      lines.push("\n— Перекуп (после налогов) —");
-      lines.push(`выручка = ценаПродажи = ${fmtInt(r.salePrice)}`);
-      lines.push(`затраты = покупка + допПерекуп + допРасходы = ${fmtInt(parseMoney($("buyPrice").value))} + ${fmtInt(parseMoney($("flipExtraExpenses").value))} + ${fmtInt(r.extraCosts)} = ${fmtInt(r.flip.costs)}`);
-      lines.push(`налоги/взносы = итогоКУплате = ${fmtInt(r.flip.taxes)}`);
-      lines.push(`прибыльПослеНалогов = выручка − затраты − налоги = ${fmtInt(r.flip.profitNet)}`);
-      if (r.flip.aprNet !== null) lines.push(`% годовых = прибыль/затраты × (365/дней) × 100% = ${(r.flip.aprNet*100).toFixed(1)}%`);
-    }
-
-    return lines.join("\n");
-  }
-
-  // ====== URL sharing ======
-  function toShareState(r){
-    return {
-      addr: r.addr || "",
-      sale: r.salePrice || 0,
-      cad: r.cadastral || 0,
-      band: state.band,
-      reg: state.reg,
-      expManual: r.expensesManual || 0,
-      extra: state.extraExpenses || [],
-      flip: state.flip,
-      buy: parseMoney($("buyPrice").value) || 0,
-      flipDays: parseMoney($("flipDays").value) || 180,
-      flipExtra: parseMoney($("flipExtraExpenses").value) || 0
-    };
   }
 
   function encodeState(obj){
@@ -782,203 +576,732 @@
       .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/,"");
     return b64;
   }
-
   function decodeState(str){
     const b64 = str.replace(/-/g,"+").replace(/_/g,"/");
     const pad = b64 + "===".slice((b64.length + 3) % 4);
     const json = decodeURIComponent(escape(atob(pad)));
     return JSON.parse(json);
   }
+  function updateUrl(){
+    if(!requiredReady()) return;
 
-  function updateUrl(r){
-    const st = toShareState(r);
-    const enc = encodeState(st);
+    const obj = {
+      seller: state.seller,
+      addr: $("addr").value||"",
+      sale: parseMoney($("salePrice").value),
+      cad: parseMoney($("cadastral").value),
+      band: state.band,
+      reg: state.reg,
+      exp: parseMoney($("expenses").value),
+      extra: state.extraExpenses,
+      flip: state.flip,
+      buy: parseMoney($("buyPrice").value),
+      days: parseMoney($("flipDays").value) || 180,
+      rentIncome: parseMoney($("rentIncome").value),
+      flipExp: state.flipExpenses,
+
+      personBiz: state.personBiz,
+      ownTerm: state.ownTerm,
+      acq: state.acq
+    };
+    const enc = encodeState(obj);
     const url = new URL(window.location.href);
     url.searchParams.set("s", enc);
     history.replaceState(null, "", url.toString());
   }
-
   function loadFromUrl(){
     const url = new URL(window.location.href);
     const s = url.searchParams.get("s");
     if(!s) return;
     try{
       const st = decodeState(s);
+      state.seller = st.seller || "IP";
       $("addr").value = st.addr || "";
       $("salePrice").value = st.sale ? fmtInt(st.sale) : "";
       $("cadastral").value = st.cad ? fmtInt(st.cad) : "";
-
       state.band = st.band || "A";
-      state.reg = st.reg || "USN_6";
-      state.flip = st.flip || "OFF";
+      state.reg  = st.reg || "USN_6";
+      $("expenses").value = st.exp ? fmtInt(st.exp) : "";
 
+      state.extraExpenses = Array.isArray(st.extra) ? st.extra.map(x=>({name:x.name||"", amount:Number(x.amount)||0})) : [];
+      state.flip = st.flip || "OFF";
+      $("buyPrice").value = st.buy ? fmtInt(st.buy) : "";
+      $("flipDays").value = st.days ? fmtInt(st.days) : "180";
+      $("rentIncome").value = st.rentIncome ? fmtInt(st.rentIncome) : "";
+      state.flipExpenses = Array.isArray(st.flipExp) ? st.flipExp.map(x=>({name:x.name||"", amount:Number(x.amount)||0})) : [];
+
+      state.personBiz = st.personBiz || "YES";
+      state.ownTerm = st.ownTerm || "1_3";
+      state.acq = st.acq || "inherit";
+
+      setActive("sellerType","data-seller",state.seller);
       setActive("incomeBand","data-band",state.band);
       setActive("taxRegime","data-reg",state.reg);
       setActive("flipToggle","data-flip",state.flip);
-
-      state.extraExpenses = Array.isArray(st.extra) ? st.extra.map(x=>({name:x.name||"", amount:Number(x.amount)||0})) : [];
-      renderExtraExpenses();
-
-      $("expenses").value = st.expManual ? fmtInt(st.expManual) : "";
-
-      $("buyPrice").value = st.buy ? fmtInt(st.buy) : "";
-      $("flipDays").value = st.flipDays ? fmtInt(st.flipDays) : "180";
-      $("flipExtraExpenses").value = st.flipExtra ? fmtInt(st.flipExtra) : "";
+      setActive("personBiz","data-biz",state.personBiz);
+      setActive("ownTerm","data-term",state.ownTerm);
+      setActive("acqType","data-acq",state.acq);
 
       $("flipBlock").hidden = (state.flip === "OFF");
       $("flipResults").hidden = (state.flip === "OFF");
 
-      applyRegimeRules();
-    } catch(e){}
+      renderExpenseList("extraExpensesList", state.extraExpenses);
+      renderExpenseList("flipExpensesList", state.flipExpenses);
+    }catch(e){}
   }
 
-  // ====== Copy ======
-  function buildTextForCopy() {
-    const r = calcAll();
-    const s = r.sale;
+  function showSellerBlocks(){
+    $("personBlock").style.display = (state.seller === "PERSON") ? "" : "none";
+    $("flipWrap").style.display = "";
+    $("bandWrap").style.display = (state.seller === "PERSON") ? "none" : "";
 
-    const lines = [];
-    lines.push("RBMGROUP.RU");
-    lines.push("Калькулятор налогов — продажа коммерческой недвижимости (Санкт-Петербург)");
-    if (r.addr) lines.push(`Адрес: ${r.addr}`);
-    lines.push(`Цена продажи: ${fmtMoney(r.salePrice)}`);
-    lines.push(`Кадастровая стоимость: ${fmtMoney(r.cadastral)}`);
-    lines.push(`База для налогов (СПб): ${fmtMoney(s.taxBase)}`);
-    lines.push(`Диапазон выручки: ${bandHuman(state.band)}`);
-    lines.push(`НДС: ${outflow(s.vat)}`);
-    lines.push(`Налог (до зачёта взносов): ${outflow(s.mainBefore)}`);
+    if (state.seller === "PERSON"){
+      $("personBizWarn").style.display = (state.personBiz === "YES") ? "" : "none";
+      $("personNoBiz").style.display = (state.personBiz === "NO") ? "" : "none";
 
-    if (state.reg !== "OSNO"){
-      lines.push(`Компенсация (зачёт) взносами: ${plus(s.credit)}`);
-      lines.push(`Взносы ИП (итого): ${outflow(s.contribTotal)}`);
+      const showAcq = (state.personBiz === "NO" && state.ownTerm === "3_5");
+      $("acqWrap").style.display = showAcq ? "" : "none";
+
+      // 1) физлицо: подтвержденных расходов нет (страховка от "прилипаний" интерфейса)
+      $("expensesWrap").hidden = true;
+      $("expenses").value = "";
+    }
+  }
+
+  function getVatRate(band, reg){
+    if (reg === "OSNO") return OSNO_VAT_RATE;
+    if (band === "A") return 0;
+    if (band === "B") return 0.05;
+    if (band === "C") return 0.07;
+    return OSNO_VAT_RATE;
+  }
+
+  function computeIpOrLlc(override = null){
+    const salePrice = parseMoney($("salePrice").value);
+    const cadastral = parseMoney($("cadastral").value);
+    const taxBase = Math.max(salePrice, cadastral);
+
+    const band = override?.band ?? state.band;
+    const reg  = override?.reg  ?? state.reg;
+    const seller = override?.seller ?? state.seller;
+
+    if (!override){
+      updateBandAvailability(taxBase);
+      applyOsnoRules();
+    }
+
+    const expensesConfirmed = parseMoney($("expenses").value);
+    const extraCosts = sumList(state.extraExpenses);
+
+    const vatRate = getVatRate(band, reg);
+    const vat = taxBase * vatRate;
+
+    let mainRate = 0;
+    let mainTaxBase = taxBase;
+
+    if (reg === "OSNO"){
+      mainRate = OSNO_TAX_RATE;
+      mainTaxBase = taxBase;
+    } else if (reg === "USN_6"){
+      mainRate = 0.06;
+      mainTaxBase = taxBase;
     } else {
-      lines.push(`Компенсация (зачёт) взносами: —`);
-      lines.push(`Взносы ИП: — (не учтены в упрощённой модели)`);
+      mainRate = 0.07;
+      mainTaxBase = Math.max(taxBase - expensesConfirmed, 0);
     }
 
-    lines.push(`Налог к уплате: ${outflow(s.mainAfter)}`);
-    lines.push(`Итого к уплате государству: ${outflow(s.totalPayable)}`);
-    lines.push(`Доп. расходы: ${outflow(r.extraCosts)}`);
-    lines.push(`На руки: ${inflow(r.netHands)}`);
-    lines.push(`Ссылка на расчёт: ${window.location.href}`);
-    return lines.join("\n");
+    const mainBefore = mainTaxBase * mainRate;
+
+    let contribFixed = 0, contribExtra = 0, contribTotal = 0, credit = 0, mainAfter = mainBefore;
+
+    if (seller === "IP" && reg !== "OSNO"){
+      contribFixed = FIXED_IP_CONTRIB_2026;
+      const baseForExtra = (reg === "USN_6") ? taxBase : mainTaxBase;
+      contribExtra = Math.max(baseForExtra - EXTRA_THRESHOLD, 0) * EXTRA_RATE;
+      contribExtra = Math.min(contribExtra, EXTRA_CAP);
+      contribTotal = contribFixed + contribExtra;
+
+      credit = Math.min(contribTotal, mainBefore);
+      mainAfter = Math.max(mainBefore - credit, 0);
+    }
+
+    const totalPayable = vat + mainAfter + contribTotal;
+    const netHands = Math.max(salePrice - totalPayable - extraCosts, 0);
+
+    return {
+      salePrice, cadastral, taxBase,
+      expensesConfirmed, extraCosts,
+      vatRate, vat, band, reg, seller,
+      mainBefore, mainAfter, credit,
+      contribFixed, contribExtra, contribTotal,
+      totalPayable, netHands,
+      mainTaxBase, mainRate
+    };
   }
 
-  $("copyBtn").addEventListener("click", async () => {
-    const text = buildTextForCopy();
-    try {
-      await navigator.clipboard.writeText(text);
-      $("message").innerHTML = `<div class="ok">✅ Скопировано в буфер обмена</div>`;
-      setTimeout(() => $("message").innerHTML = "", 1400);
-    } catch {
-      $("message").innerHTML = `<div class="warn">Не удалось скопировать. Можно выделить текст вручную.</div>`;
+  function ndflFromBase(base){
+    return (NDFL_13 * Math.min(base, NDFL_13_LIMIT) + NDFL_15 * Math.max(base - NDFL_13_LIMIT, 0));
+  }
+
+  function computePerson(){
+    const salePrice = parseMoney($("salePrice").value);
+    const cadastral = parseMoney($("cadastral").value);
+    const taxBase = Math.max(salePrice, cadastral);
+
+    const extraCosts = sumList(state.extraExpenses);
+
+    let ndfl = 0;
+
+    if (state.personBiz === "YES"){
+      ndfl = ndflFromBase(taxBase);
+    } else {
+      if (state.ownTerm === "GT5"){
+        ndfl = 0;
+      } else if (state.ownTerm === "3_5"){
+        const privileged = (state.acq !== "other");
+        ndfl = privileged ? 0 : ndflFromBase(taxBase);
+      } else {
+        ndfl = ndflFromBase(taxBase);
+      }
     }
+
+    const totalPayable = ndfl;
+    const netHands = Math.max(salePrice - totalPayable - extraCosts, 0);
+
+    return {salePrice,cadastral,taxBase,extraCosts,ndfl,totalPayable,netHands};
+  }
+
+  function advisorMessagesForPersonWhenNdflApplies(personRes, reasonText){
+    const msgs = [];
+    msgs.push(`<div class="warn">⚠️ ${escapeHtml(reasonText)} Здесь показан расчёт НДФЛ по ставкам 13%/15% от базы <b>max(цена, кадастр)</b>.</div>`);
+
+    const bandAuto = autoBandByBase(personRes.taxBase);
+
+    let bestIp;
+    if (bandAuto === "D"){
+      bestIp = computeIpOrLlc({seller:"IP", band:"D", reg:"OSNO"});
+    } else {
+      const ip6 = computeIpOrLlc({seller:"IP", band:bandAuto, reg:"USN_6"});
+      const ip7 = computeIpOrLlc({seller:"IP", band:bandAuto, reg:"USN_7"});
+      bestIp = (ip7.totalPayable < ip6.totalPayable) ? ip7 : ip6;
+    }
+
+    const diff = personRes.totalPayable - bestIp.totalPayable;
+
+    if (diff > 0){
+      msgs.push(
+        `<div class="ok">✅ Если оформить ИП, налоги могут уменьшиться примерно на <b>${fmtInt(diff)} ₽</b>.<br>` +
+        `Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b>.</div>`
+      );
+    } else {
+      msgs.push(
+        `<div class="ok">✅ Если оформить ИП, по этому упрощённому сравнению экономии может не быть (нужны детали по выручке/режиму/расходам).<br>` +
+        `Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b>.</div>`
+      );
+    }
+    return msgs.join("");
+  }
+
+  function advisorMessagesForPersonWithBiz(personRes){
+    return advisorMessagesForPersonWhenNdflApplies(
+      personRes,
+      "При продаже физлицом (когда объект использовался в предпринимательской деятельности) налог при продаже уплачивается обязательно."
+    );
+  }
+
+  function advisorMessagesIpOrLlc(r){
+    const msgs = [];
+    const taxBase = r.taxBase;
+
+    function simulateWithBand(nextBand){
+      const saveBand = state.band;
+      const saveReg = state.reg;
+
+      state.band = nextBand;
+      if (nextBand === "D") state.reg = "OSNO";
+      const sim = computeIpOrLlc();
+      state.band = saveBand;
+      state.reg = saveReg;
+      applyOsnoRules();
+      return sim;
+    }
+
+    if (state.band === "A"){
+      const simB = simulateWithBand("B");
+      const diff = simB.totalPayable - r.totalPayable;
+      if (diff > 0){
+        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>20 млн</b>, включится НДС (5%) и итог к уплате вырастет на <b>${fmtInt(diff)} ₽</b>.</div>`);
+      }
+    }
+
+    if (state.band === "B"){
+      const simC = simulateWithBand("C");
+      const diff = simC.totalPayable - r.totalPayable;
+      if (diff > 0){
+        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>250 млн</b>, ставка НДС станет 7% и итог к уплате вырастет на <b>${fmtInt(diff)} ₽</b>.</div>`);
+      }
+    }
+
+    if (state.band === "C"){
+      const simD = simulateWithBand("D");
+      const diff = simD.totalPayable - r.totalPayable;
+      if (diff > 0){
+        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>450 млн</b>, расчёт перейдёт на ОСНО (упрощ.) и итог к уплате может вырасти на <b>${fmtInt(diff)} ₽</b>. Нужен индивидуальный расчёт.</div>`);
+      }
+    }
+
+    function savingIfLowerBand(lowerBand, threshold){
+      const saveBand = state.band;
+      const saveReg  = state.reg;
+      const cur = r.totalPayable;
+
+      state.band = lowerBand;
+      if (lowerBand !== "D" && state.reg === "OSNO") state.reg = "USN_6";
+      const low = computeIpOrLlc().totalPayable;
+
+      state.band = saveBand;
+      state.reg  = saveReg;
+      applyOsnoRules();
+
+      const diff = cur - low;
+      if (diff > 0){
+        msgs.push(`<div class="ok">✅ Если выручка будет ≤ <b>${fmtInt(threshold)} ₽</b>, итог к уплате снизится на <b>${fmtInt(diff)} ₽</b>.</div>`);
+      }
+    }
+
+    if (state.band === "B" && taxBase <= 20_000_000) savingIfLowerBand("A", 20_000_000);
+    if (state.band === "C" && taxBase <= 250_000_000) savingIfLowerBand("B", 250_000_000);
+    if (state.band === "D" && taxBase <= 450_000_000) savingIfLowerBand("C", 450_000_000);
+
+    if (state.reg === "USN_6"){
+      const need = taxBase / 7;
+      msgs.push(`<div class="ok">✅ Если подтвержденные расходы будут больше <b>${fmtInt(need)} ₽</b>, то режим <b>7% доходы − расходы</b> будет выгоднее по налогу.</div>`);
+    }
+
+    return msgs.join("");
+  }
+
+  function render(){
+    $("message").innerHTML = "";
+
+    showSellerBlocks();
+    applyOsnoRules();
+
+    if(!requiredReady()){
+      $("needFieldsBox").hidden = false;
+      $("computedBox").hidden = true;
+      return;
+    }
+
+    $("needFieldsBox").hidden = true;
+    $("computedBox").hidden = false;
+
+    const extraCosts = sumList(state.extraExpenses);
+
+    if (extraCosts > 0){
+      const items = state.extraExpenses
+        .filter(x => (Number(x.amount)||0) > 0 || (x.name||"").trim() )
+        .map(x => `• ${escapeHtml((x.name||"").trim() || "Расход")} — ${fmtMoney(Number(x.amount)||0)}`)
+        .join("<br>");
+      $("extraItems").innerHTML = items || "—";
+      $("extraDetails").style.display = "";
+      $("extraDetails").open = false;
+    } else {
+      $("extraDetails").style.display = "none";
+      $("extraItems").innerHTML = "";
+    }
+
+    let advisor = "";
+
+    if (state.seller === "PERSON"){
+      const r = computePerson();
+
+      $("rTaxBase").textContent = fmtMoney(r.taxBase);
+
+      $("vatLines").style.display = "none";
+
+      $("ipOrLlcTaxBlock").style.display = "none";
+      $("personTaxBlock").style.display = "";
+      $("splitIpOrLlc").style.display = "none";
+
+      // 1) физлицо: подтвержденные расходы не показываем никогда
+      $("lineConfirmedExpenses").style.display = "none";
+
+      $("rNdfl").textContent = outflow(r.ndfl);
+
+      $("rExtraCosts").textContent = outflow(r.extraCosts);
+      $("rTotalPayable").textContent = outflow(r.totalPayable);
+      $("rNetHands").textContent = inflow(r.netHands);
+
+      if (state.personBiz === "YES"){
+        advisor = advisorMessagesForPersonWithBiz(r);
+      } else {
+        if (r.ndfl > 0){
+          advisor = advisorMessagesForPersonWhenNdflApplies(
+            r,
+            "Если не выполнен минимальный срок владения (или способ получения не льготный), возникает НДФЛ."
+          );
+        } else {
+          advisor = `<div class="ok">✅ В вашем случае НДФЛ = 0 (по выбранному сроку владения/способу получения).</div>`;
+        }
+      }
+
+      $("advisorBox").innerHTML = advisor;
+
+      if (state.flip === "ON"){
+        $("flipResults").hidden = false;
+
+        const buy  = parseMoney($("buyPrice").value);
+        const days = parseMoney($("flipDays").value) || 180;
+        const rentIncome = parseMoney($("rentIncome").value);
+        const flipExtra = sumList(state.flipExpenses);
+
+        $("rRentIncome").textContent = plus(rentIncome);
+
+        const totalCosts = buy + flipExtra + r.extraCosts;
+        const profitNet = (r.salePrice + rentIncome) - totalCosts - r.totalPayable;
+
+        const profitEl = $("rFlipProfit");
+        profitEl.textContent = (profitNet>=0) ? inflow(profitNet) : outflow(Math.abs(profitNet));
+        profitEl.className = "v " + (profitNet>=0 ? "pos" : "neg");
+
+        const invested = totalCosts > 0 ? totalCosts : 0;
+        const apr = (days>0 && invested>0) ? (profitNet/invested) * (365/days) : NaN;
+        const aprEl = $("rFlipAPR");
+        if (isFinite(apr)){
+          aprEl.textContent = (apr*100).toFixed(1) + "%";
+          aprEl.className = "v " + (apr>=0 ? "pos" : "neg");
+        } else {
+          aprEl.textContent = "—";
+          aprEl.className = "v";
+        }
+      } else {
+        $("flipResults").hidden = true;
+      }
+
+      updateUrl();
+      return;
+    }
+
+    $("vatLines").style.display = "";
+
+    const r = computeIpOrLlc();
+
+    $("rTaxBase").textContent = fmtMoney(r.taxBase);
+
+    if (state.reg === "USN_7"){
+      $("lineConfirmedExpenses").style.display = "";
+      $("rConfirmedExpenses").textContent = plus(r.expensesConfirmed);
+    } else {
+      $("lineConfirmedExpenses").style.display = "none";
+    }
+
+    const vatLabel =
+      (state.reg === "OSNO") ? "10% (ОСНО, упрощ.)" :
+      (state.band==="A") ? "0%" :
+      (state.band==="B") ? "5%" :
+      (state.band==="C") ? "7%" :
+      "10% (ОСНО, упрощ.)";
+
+    $("rVatRate").textContent = vatLabel;
+    $("rVat").textContent = outflow(r.vat);
+
+    $("ipOrLlcTaxBlock").style.display = "";
+    $("personTaxBlock").style.display = "none";
+    $("splitIpOrLlc").style.display = "";
+
+    $("rMainTaxBefore").textContent = outflow(r.mainBefore);
+
+    if (state.seller === "IP" && state.reg !== "OSNO"){
+      $("contribBlock").style.display = "";
+      $("lineCredit").style.display = "";
+      $("rCredit").textContent = plus(r.credit);
+      $("rContribFixed").textContent = outflow(r.contribFixed);
+      $("rContribExtra").textContent = outflow(r.contribExtra);
+      $("rContribTotal").textContent = outflow(r.contribTotal);
+    } else {
+      $("contribBlock").style.display = "none";
+      $("lineCredit").style.display = "none";
+    }
+
+    $("rMainTaxAfter").textContent = outflow(r.mainAfter);
+
+    $("rExtraCosts").textContent = outflow(r.extraCosts);
+
+    $("rTotalPayable").textContent = outflow(r.totalPayable);
+    $("rNetHands").textContent = inflow(r.netHands);
+
+    advisor = advisorMessagesIpOrLlc(r);
+    $("advisorBox").innerHTML = advisor;
+
+    if (state.flip === "ON"){
+      $("flipResults").hidden = false;
+
+      const buy  = parseMoney($("buyPrice").value);
+      const days = parseMoney($("flipDays").value) || 180;
+      const rentIncome = parseMoney($("rentIncome").value);
+      const flipExtra = sumList(state.flipExpenses);
+
+      $("rRentIncome").textContent = plus(rentIncome);
+
+      const totalCosts = buy + flipExtra + r.extraCosts;
+      const profitNet = (r.salePrice + rentIncome) - totalCosts - r.totalPayable;
+
+      const profitEl = $("rFlipProfit");
+      profitEl.textContent = (profitNet>=0) ? inflow(profitNet) : outflow(Math.abs(profitNet));
+      profitEl.className = "v " + (profitNet>=0 ? "pos" : "neg");
+
+      const invested = totalCosts > 0 ? totalCosts : 0;
+      const apr = (days>0 && invested>0) ? (profitNet/invested) * (365/days) : NaN;
+      const aprEl = $("rFlipAPR");
+      if (isFinite(apr)){
+        aprEl.textContent = (apr*100).toFixed(1) + "%";
+        aprEl.className = "v " + (apr>=0 ? "pos" : "neg");
+      } else {
+        aprEl.textContent = "—";
+        aprEl.className = "v";
+      }
+    } else {
+      $("flipResults").hidden = true;
+    }
+
+    updateUrl();
+  }
+
+  ["salePrice","cadastral","expenses","buyPrice","flipDays","rentIncome"].forEach(id=>{
+    $(id).addEventListener("input", ()=>{
+      formatInputThousands($(id));
+      render();
+    });
+  });
+  $("addr").addEventListener("input", render);
+
+  $("sellerType").addEventListener("click",(e)=>{
+    const s = e.target?.getAttribute?.("data-seller");
+    if(!s) return;
+    state.seller = s;
+    setActive("sellerType","data-seller",s);
+
+    showSellerBlocks();
+    applyOsnoRules();
+    render();
+  });
+
+  $("incomeBand").addEventListener("click", (e)=>{
+    const b = e.target?.getAttribute?.("data-band");
+    if(!b || e.target.disabled) return;
+    state.band = b;
+    setActive("incomeBand","data-band",b);
+    applyOsnoRules();
+    render();
+  });
+
+  $("taxRegime").addEventListener("click", (e)=>{
+    const r = e.target?.getAttribute?.("data-reg");
+    if(!r) return;
+    if(state.band==="D" && r !== "OSNO") return;
+    state.reg = r;
+    setActive("taxRegime","data-reg",r);
+    $("expensesWrap").hidden = !(state.reg==="USN_7");
+    render();
+  });
+
+  $("personBiz").addEventListener("click",(e)=>{
+    const v = e.target?.getAttribute?.("data-biz");
+    if(!v) return;
+    state.personBiz = v;
+    setActive("personBiz","data-biz",v);
+    showSellerBlocks();
+    render();
+  });
+
+  $("ownTerm").addEventListener("click",(e)=>{
+    const v = e.target?.getAttribute?.("data-term");
+    if(!v) return;
+    state.ownTerm = v;
+    setActive("ownTerm","data-term",v);
+    showSellerBlocks();
+    render();
+  });
+
+  $("acqType").addEventListener("click",(e)=>{
+    const v = e.target?.getAttribute?.("data-acq");
+    if(!v) return;
+    state.acq = v;
+    setActive("acqType","data-acq",v);
+    render();
+  });
+
+  $("flipToggle").addEventListener("click",(e)=>{
+    const f = e.target?.getAttribute?.("data-flip");
+    if(!f) return;
+    state.flip = f;
+    setActive("flipToggle","data-flip",f);
+    $("flipBlock").hidden = (f==="OFF");
+    render();
+  });
+
+  $("addExpenseBtn").addEventListener("click", ()=>{
+    state.extraExpenses.push({name:"", amount:0});
+    renderExpenseList("extraExpensesList", state.extraExpenses);
+    render();
+  });
+
+  $("addFlipExpenseBtn").addEventListener("click", ()=>{
+    state.flipExpenses.push({name:"", amount:0});
+    renderExpenseList("flipExpensesList", state.flipExpenses);
+    render();
+  });
+
+  $("toggleFormulaBtn").addEventListener("click", ()=>{
+    state.showFormula = !state.showFormula;
+    $("formulaBox").hidden = !state.showFormula;
+    $("toggleFormulaBtn").textContent = state.showFormula ? "Скрыть формулы" : "Показать формулы";
+
+    if(state.showFormula){
+      $("formulaBox").textContent =
+`Формулы (ИП/ООО):
+1) База = max(Цена продажи, Кадастровая)
+
+2) НДС (по диапазону):
+до 20 млн: 0%
+20–250 млн: 5%
+250–450 млн: 7%
+>450 млн: ОСНО (упрощ.) 10%
+НДС = База * ставка
+
+3) Налог:
+6%: НалогДо = База * 6%
+7%: БазаНал = max(База − ПодтвержденныеРасходы, 0)
+    НалогДо = БазаНал * 7%
+ОСНО (упрощ.): НалогДо = База * 10%
+
+4) Взносы ИП (2026):
+Фикс = 57 390
+Доп = min( 1% * max(БазаДля1% − 300 000, 0), 321 818 )
+БазаДля1% = База (для 6%) или БазаНал (для 7%)
+
+5) Компенсация(зачёт) = min(ВзносыИтого, НалогДо)
+НалогКУплате = max(НалогДо − Компенсация, 0)
+
+6) ИтогоГосударству = НДС + НалогКУплате + ВзносыИтого
+7) НаРуки = ЦенаПродажи − ИтогоГосударству − ДопРасходы
+
+Формулы (Физлицо):
+БазаНДФЛ = max(Цена продажи, Кадастровая)
+НДФЛ = 13% * min(БазаНДФЛ, 5 000 000) + 15% * max(БазаНДФЛ − 5 000 000, 0)`;
+    }
+
+    render();
+  });
+
+  $("resetBtn").addEventListener("click", ()=>{
+    $("addr").value = "";
+    $("salePrice").value = "";
+    $("cadastral").value = "";
+    $("expenses").value = "";
+    $("buyPrice").value = "";
+    $("flipDays").value = "180";
+    $("rentIncome").value = "";
+
+    state.seller="IP";
+    state.band="A";
+    state.reg="USN_6";
+    state.flip="OFF";
+    state.showFormula=false;
+    state.extraExpenses=[];
+    state.flipExpenses=[];
+    state.personBiz="YES";
+    state.ownTerm="1_3";
+    state.acq="inherit";
+
+    setActive("sellerType","data-seller","IP");
+    setActive("incomeBand","data-band","A");
+    setActive("taxRegime","data-reg","USN_6");
+    setActive("flipToggle","data-flip","OFF");
+    setActive("personBiz","data-biz","YES");
+    setActive("ownTerm","data-term","1_3");
+    setActive("acqType","data-acq","inherit");
+
+    $("expensesWrap").hidden = true;
+    $("flipBlock").hidden = true;
+
+    renderExpenseList("extraExpensesList", state.extraExpenses);
+    renderExpenseList("flipExpensesList", state.flipExpenses);
+
+    $("formulaBox").hidden = true;
+    $("toggleFormulaBtn").textContent = "Показать формулы";
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("s");
+    history.replaceState(null,"",url.toString());
+
+    render();
   });
 
   $("copyLinkBtn").addEventListener("click", async ()=>{
     try{
+      updateUrl();
       await navigator.clipboard.writeText(window.location.href);
       $("message").innerHTML = `<div class="ok">✅ Ссылка скопирована</div>`;
-      setTimeout(() => $("message").innerHTML = "", 1400);
+      setTimeout(()=>{$("message").innerHTML="";},1200);
     }catch{
-      $("message").innerHTML = `<div class="warn">Не удалось скопировать ссылку. Скопируй из адресной строки.</div>`;
+      $("message").innerHTML = `<div class="warn">Не удалось скопировать ссылку.</div>`;
     }
   });
 
-  // ====== render ======
-  function render() {
-    const r = calcAll();
-    const s = r.sale;
+  $("copyBtn").addEventListener("click", async ()=>{
+    try{
+      if(!requiredReady()) return;
+      updateUrl();
 
-    const showContrib = (state.reg !== "OSNO");
-    $("contribRow0").style.display = showContrib ? "" : "none";
-    $("contribRow1").style.display = showContrib ? "" : "none";
-    $("contribRow2").style.display = showContrib ? "" : "none";
-    $("contribRow3").style.display = showContrib ? "" : "none";
+      let txt = `RBMGROUP.RU\nКалькулятор налогов — продажа коммерческой недвижимости (СПб)\nВерсия: ${APP_VERSION}\nАдрес: ${($("addr").value||"").trim() || "—"}\nСсылка: ${window.location.href}\n`;
 
-    $("rTaxBase").textContent = fmtMoney(s.taxBase);
-    $("rVatRate").textContent = `${pct(s.vatRate)} (выручка: ${bandHuman(state.band)})`;
-
-    $("rVat").textContent = outflow(s.vat);
-    $("rMainTaxBefore").textContent = outflow(s.mainBefore);
-
-    $("rContribCredit").textContent = plus(s.credit);
-
-    $("rContribFixed").textContent = outflow(s.contribFixed);
-    $("rContribExtra").textContent = outflow(s.contribExtra);
-    $("rContribTotal").textContent = outflow(s.contribTotal);
-
-    $("rMainTaxAfter").textContent = outflow(s.mainAfter);
-    $("rTotalPayable").textContent = outflow(s.totalPayable);
-
-    const netEl = $("rNetHands");
-    if (r.netHands >= 0){
-      netEl.textContent = inflow(r.netHands);
-      netEl.classList.add("pos"); netEl.classList.remove("neg");
-    } else {
-      netEl.textContent = outflow(Math.abs(r.netHands));
-      netEl.classList.add("neg"); netEl.classList.remove("pos");
-    }
-
-    const hint = nearestBandDeltaText(s.taxBase, {
-      salePrice: r.salePrice,
-      cadastral: r.cadastral,
-      regime: state.reg,
-      expenses: r.expenses
-    });
-    $("bandDeltaHint").innerHTML = hint || "";
-
-    $("flipResults").hidden = (state.flip === "OFF");
-    if (state.flip === "ON"){
-      $("rFlipStatus").textContent = "включен";
-      $("rFlipRevenue").textContent = inflow(r.flip.revenue);
-      $("rFlipCosts").textContent = outflow(r.flip.costs);
-      $("rFlipTaxes").textContent = outflow(r.flip.taxes);
-
-      const profitEl = $("rFlipProfitNet");
-      const aprEl = $("rFlipAPR");
-
-      if (r.flip.profitNet >= 0) {
-        profitEl.textContent = inflow(r.flip.profitNet);
-        profitEl.classList.remove("neg"); profitEl.classList.add("pos");
+      if (state.seller === "PERSON"){
+        const r = computePerson();
+        txt += `\nКто продаёт: Физлицо\nЦена продажи: ${fmtMoney(r.salePrice)}\nКадастровая: ${fmtMoney(r.cadastral)}\nБаза: ${fmtMoney(r.taxBase)}\nНДФЛ: ${outflow(r.ndfl)}\nДоп. расходы: ${outflow(r.extraCosts)}\nИтого государству: ${outflow(r.totalPayable)}\nНа руки: ${inflow(r.netHands)}\n`;
       } else {
-        profitEl.textContent = outflow(Math.abs(r.flip.profitNet));
-        profitEl.classList.remove("pos"); profitEl.classList.add("neg");
+        const r = computeIpOrLlc();
+        txt += `\nКто продаёт: ${state.seller === "IP" ? "ИП" : "ООО"}\nРежим: ${state.reg}\nДиапазон выручки: ${state.band}\nЦена продажи: ${fmtMoney(r.salePrice)}\nКадастровая: ${fmtMoney(r.cadastral)}\nБаза: ${fmtMoney(r.taxBase)}\nНДС: ${outflow(r.vat)}\nНалог к уплате: ${outflow(r.mainAfter)}\n`;
+        if (state.reg === "USN_7") txt += `Подтв. расходы: ${plus(r.expensesConfirmed)}\n`;
+        if (state.seller === "IP" && state.reg !== "OSNO"){
+          txt += `Взносы: ${outflow(r.contribTotal)}\nКомпенсация (зачёт): ${plus(r.credit)}\n`;
+        }
+        txt += `Доп. расходы: ${outflow(r.extraCosts)}\nИтого государству: ${outflow(r.totalPayable)}\nНа руки: ${inflow(r.netHands)}\n`;
       }
 
-      if (r.flip.aprNet !== null) {
-        const txt = (r.flip.aprNet*100).toFixed(1) + "%";
-        aprEl.textContent = txt;
-        if (r.flip.aprNet >= 0) { aprEl.classList.add("pos"); aprEl.classList.remove("neg"); }
-        else { aprEl.classList.add("neg"); aprEl.classList.remove("pos"); }
-      } else {
-        aprEl.textContent = "—";
-        aprEl.classList.remove("pos","neg");
-      }
+      await navigator.clipboard.writeText(txt);
+      $("message").innerHTML = `<div class="ok">✅ Расчёт скопирован</div>`;
+      setTimeout(()=>{$("message").innerHTML="";},1200);
+    }catch{
+      $("message").innerHTML = `<div class="warn">Не удалось скопировать.</div>`;
     }
+  });
 
-    if (state.showFormula) $("formulaBox").textContent = buildFormulaText(r);
+  function init(){
+    $("flipDays").value = "180";
+    renderExpenseList("extraExpensesList", state.extraExpenses);
+    renderExpenseList("flipExpensesList", state.flipExpenses);
 
-    const warnings = [...s.warnings];
-    if (warnings.length) {
-      $("message").innerHTML = `<div class="warn"><b>Важно:</b><br>• ${warnings.join("<br>• ")}</div>`;
-    } else {
-      $("message").innerHTML = "";
-    }
+    loadFromUrl();
+    setActive("sellerType","data-seller",state.seller);
+    setActive("incomeBand","data-band",state.band);
+    setActive("taxRegime","data-reg",state.reg);
+    setActive("flipToggle","data-flip",state.flip);
+    setActive("personBiz","data-biz",state.personBiz);
+    setActive("ownTerm","data-term",state.ownTerm);
+    setActive("acqType","data-acq",state.acq);
 
-    updateUrl(r);
+    showSellerBlocks();
+    applyOsnoRules();
+
+    $("expensesWrap").hidden = !(state.reg==="USN_7");
+    $("flipBlock").hidden = (state.flip==="OFF");
+
+    render();
   }
 
-  // ====== init ======
-  function ensureDefaults(){
-    if (!$("flipDays").value) $("flipDays").value = "180";
-  }
-
-  loadFromUrl();
-  ensureDefaults();
-  applyRegimeRules();
-  renderExtraExpenses();
-  render();
+  init();
 </script>
 </body>
 </html>
