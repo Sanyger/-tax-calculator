@@ -1,5 +1,10 @@
-<!-- ✅ STABLE VERSION (fallback): 2026-02-05
+<!-- ✅ STABLE VERSION (final): 2026-02-05 (PATCH-3)
 Если что-то ломается — откатываемся к этому файлу 1-в-1.
+
+Изменения по твоим пунктам:
+1) Если выбран АУСН 20% — убрана подсказка “НДС=0 и взносы=0”. (Для АУСН 8% подсказка осталась.)
+2) Всегда считаем и показываем сравнение “доходы” vs “доходы−расходы” (УСН и АУСН):
+   — показываем, при каких подтверждённых расходах выгоднее выбрать конкретный режим “доходы−расходы”.
 -->
 <!doctype html>
 <html lang="ru">
@@ -64,6 +69,7 @@
     details{border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px; background:rgba(0,0,0,.10)}
     details summary{cursor:pointer; color:var(--muted); font-size:12px}
 
+    /* Баннер */
     .topBanner{
       display:block;margin:0 0 14px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
       box-shadow:0 10px 25px rgba(0,0,0,.25);transition:.15s;text-decoration:none;height:140px;
@@ -96,6 +102,13 @@
       display:flex; align-items:center; gap:8px;
     }
 
+    /* ✅ Мобилка: всегда fallback (чтобы не было белых полей от картинки) */
+    @media(max-width:640px){
+      .topBanner img{display:none !important;}
+      .bannerFallback{display:flex !important;}
+    }
+
+    /* tooltip */
     .qwrap{display:flex;align-items:center;gap:8px}
     .qmark{
       width:18px;height:18px;border-radius:999px;
@@ -166,14 +179,18 @@
         </div>
       </div>
 
-      <!-- Band: скрываем для физлица -->
-      <div style="margin-top:14px" id="bandWrap">
-        <label>Годовая выручка после продажи (диапазон)</label>
-        <div class="seg" id="incomeBand">
-          <button data-band="A" class="active">до 20 млн</button>
-          <button data-band="B">20–250 млн</button>
-          <button data-band="C">250–450 млн</button>
-          <button data-band="D">&gt; 450 млн</button>
+      <!-- Оборот (только для ИП/ООО) -->
+      <div style="margin-top:14px" id="turnoverWrap">
+        <label>Годовой оборот после продажи (диапазон)</label>
+        <div class="seg" id="turnoverBand">
+          <button data-tb="T20" class="active">до 20 млн</button>
+          <button data-tb="T60">20–60 млн</button>
+          <button data-tb="T250">60–250 млн</button>
+          <button data-tb="T450">250–450 млн</button>
+          <button data-tb="T450P">&gt; 450 млн</button>
+        </div>
+        <div class="hint" id="turnoverHint">
+          Диапазон влияет на НДС (0% / 5% / 7% / ОСНО упрощ.). АУСН доступен только при обороте ≤ 60 млн.
         </div>
       </div>
 
@@ -216,7 +233,7 @@
         </div>
 
         <div class="warn" id="personBizWarn" style="display:none">
-          Если деятельность велась, налог при продаже (НДФЛ) оплачивается обязательно. Ниже показываем расчёт НДФЛ.
+          Если деятельность велась, налог при продаже hooking (НДФЛ) оплачивается обязательно. Ниже показываем расчёт НДФЛ.
         </div>
       </div>
 
@@ -224,21 +241,35 @@
       <div style="margin-top:14px" id="taxRegimeWrap">
         <label id="taxRegimeTitle">Налоговый режим</label>
         <div class="seg" id="taxRegime">
-          <button data-reg="USN_6" class="active">6% с доходов</button>
-          <button data-reg="USN_7">7% доходы − расходы</button>
+          <button data-reg="USN_6" class="active">УСН 6% (доходы)</button>
+          <button data-reg="USN_15">УСН 15% (доходы − расходы)</button>
+          <button data-reg="USN_7">УСН 7% (доходы − расходы)</button>
+          <button data-reg="AUSN_8">АУСН 8% (доходы)</button>
+          <button data-reg="AUSN_20">АУСН 20% (доходы − расходы)</button>
           <button data-reg="OSNO" style="display:none">ОСНО</button>
         </div>
-        <div class="hint" id="osnoHint" style="display:none">
-          Выбран диапазон выручки &gt; 450 млн — требуется более индивидуальный подсчёт. Здесь применены ставки 10% (налог) и 10% (НДС).
+
+        <div class="hint" id="spb7Hint" style="display:none">
+          УСН 7% “доходы − расходы” действует только для региона <b>Санкт-Петербург</b> (льготная ставка).
         </div>
+
+        <div class="hint" id="usn15Hint" style="display:none">
+          Обычно ставка “доходы − расходы” = <b>15%</b>. В некоторых регионах ставку можно снизить (например, в Санкт-Петербурге до <b>7%</b>).
+        </div>
+
+        <div class="hint" id="osnoHint" style="display:none">
+          Выбран оборот &gt; 450 млн — требуется более индивидуальный подсчёт. Здесь применены ставки 10% (налог) и 10% (НДС).
+        </div>
+
+        <div class="hint" id="ausnHint" style="display:none"></div>
 
         <div class="hint" id="llcModeHint" style="display:none"></div>
       </div>
 
       <div style="margin-top:14px" id="expensesWrap" hidden>
-        <label>Подтвержденные расходы для режима 7%, ₽</label>
+        <label>Подтвержденные расходы (для “доходы − расходы”), ₽</label>
         <input id="expenses" type="text" inputmode="numeric" placeholder="например 3 000 000 (или 0)">
-        <div class="hint">Эти расходы уменьшают налоговую базу только в режиме 7%.</div>
+        <div class="hint">Учитываются только в режимах “доходы − расходы” (УСН 15%/7% и АУСН 20%).</div>
       </div>
 
       <div class="split"></div>
@@ -253,7 +284,7 @@
 
       <div class="split"></div>
 
-      <!-- "перекуп" переименован -->
+      <!-- краткосрочный инвестор -->
       <div id="flipWrap">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div>
@@ -315,7 +346,7 @@
         <div class="result-line"><div class="k">База для налогов (min база)</div><div class="v" id="rTaxBase">—</div></div>
 
         <div id="lineConfirmedExpenses" style="display:none" class="result-line">
-          <div class="k">Подтвержденные расходы (для 7%)</div><div class="v pos" id="rConfirmedExpenses">—</div>
+          <div class="k">Подтвержденные расходы (учтены в базе)</div><div class="v pos" id="rConfirmedExpenses">—</div>
         </div>
 
         <div id="vatLines">
@@ -377,11 +408,10 @@
 </div>
 
 <script>
-  // ✅ STABLE VERSION (fallback): 2026-02-05
-  const APP_VERSION = "stable-2026-02-05";
-
+  const APP_VERSION = "stable-final-2026-02-05-patch3";
   const $ = (id) => document.getElementById(id);
 
+  // Баннер: на десктопе можно показывать картинку, на мобиле скрыто CSS-ом
   const bannerImg = $("bannerImg");
   bannerImg.addEventListener("load", () => {
     bannerImg.style.display = "block";
@@ -392,31 +422,40 @@
     $("bannerFallback").style.display = "flex";
   });
 
+  // Константы взносов (ИП) — только ИП на УСН (НЕ АУСН, НЕ ОСНО)
   const FIXED_IP_CONTRIB_2026 = 57390;
   const EXTRA_RATE = 0.01;
   const EXTRA_THRESHOLD = 300000;
   const EXTRA_CAP = 321818;
 
+  // Упрощённая ОСНО (для >450 млн)
   const OSNO_TAX_RATE = 0.10;
   const OSNO_VAT_RATE = 0.10;
 
+  // НДФЛ физлица
   const NDFL_13_LIMIT = 5_000_000;
   const NDFL_13 = 0.13;
   const NDFL_15 = 0.15;
 
+  // АУСН (упрощенная модель)
+  const AUSN_8 = 0.08;
+  const AUSN_20 = 0.20;
+  const AUSN_MIN = 0.03; // минимальный налог для AUSN_20
+
   let state = {
-    seller: "IP",        // IP | PERSON | LLC
-    band: "A",           // A,B,C,D
-    reg: "USN_6",        // USN_6 | USN_7 | OSNO
+    seller: "IP",            // IP | PERSON | LLC
+    turnover: "T20",         // T20 | T60 | T250 | T450 | T450P (только ИП/ООО)
+    reg: "USN_6",            // USN_6 | USN_15 | USN_7 | AUSN_8 | AUSN_20 | OSNO
     flip: "OFF",
     showFormula: false,
     extraExpenses: [],
     flipExpenses: [],
-    personBiz: "YES",    // YES|NO
-    ownTerm: "1_3",      // 1_3|3_5|GT5
-    acq: "inherit"       // inherit|priv|rent|gift|other
+    personBiz: "YES",        // YES|NO
+    ownTerm: "1_3",          // 1_3|3_5|GT5
+    acq: "inherit"           // inherit|priv|rent|gift|other
   };
 
+  // utils
   function parseMoney(str) {
     const cleaned = String(str ?? "").replace(/[^\d]/g, "");
     return cleaned ? Number(cleaned) : 0;
@@ -448,6 +487,7 @@
     }[m]));
   }
 
+  // расходы списком
   function renderExpenseList(containerId, list){
     const box = $(containerId);
     box.innerHTML = "";
@@ -488,88 +528,185 @@
   }
   function sumList(list){ return list.reduce((s,x)=>s + (Number(x.amount)||0), 0); }
 
+  // обязательные поля
   function requiredReady(){
     const sale = parseMoney($("salePrice").value);
     const cad  = parseMoney($("cadastral").value);
     return sale > 0 && cad > 0;
   }
-
-  function autoBandByBase(taxBase){
-    if (taxBase <= 20_000_000) return "A";
-    if (taxBase <= 250_000_000) return "B";
-    if (taxBase <= 450_000_000) return "C";
-    return "D";
+  function getTaxBase(){
+    const sale = parseMoney($("salePrice").value);
+    const cad  = parseMoney($("cadastral").value);
+    return Math.max(sale, cad);
   }
 
-  function updateBandAvailability(taxBase){
-    const btnA = $("incomeBand").querySelector('button[data-band="A"]');
-    const btnB = $("incomeBand").querySelector('button[data-band="B"]');
-    const btnC = $("incomeBand").querySelector('button[data-band="C"]');
+  // ✅ Оборот не может быть меньше базы (цена/кадастр)
+  function updateTurnoverAvailability(taxBase){
+    const wrap = $("turnoverBand");
+    if (!wrap) return;
 
-    btnA.disabled = (taxBase > 20_000_000);
-    btnB.disabled = (taxBase > 250_000_000);
-    btnC.disabled = (taxBase > 450_000_000);
+    const btnT20  = wrap.querySelector('button[data-tb="T20"]');
+    const btnT60  = wrap.querySelector('button[data-tb="T60"]');
+    const btnT250 = wrap.querySelector('button[data-tb="T250"]');
+    const btnT450 = wrap.querySelector('button[data-tb="T450"]');
 
-    if ((state.band==="A" && btnA.disabled) || (state.band==="B" && btnB.disabled) || (state.band==="C" && btnC.disabled)){
-      if (!btnB.disabled) state.band = "B";
-      else if (!btnC.disabled) state.band = "C";
-      else state.band = "D";
-      setActive("incomeBand","data-band",state.band);
+    btnT20.disabled  = taxBase > 20_000_000;
+    btnT60.disabled  = taxBase > 60_000_000;
+    btnT250.disabled = taxBase > 250_000_000;
+    btnT450.disabled = taxBase > 450_000_000;
+
+    function pickFirstAllowed(){
+      if (!btnT20.disabled) return "T20";
+      if (!btnT60.disabled) return "T60";
+      if (!btnT250.disabled) return "T250";
+      if (!btnT450.disabled) return "T450";
+      return "T450P";
     }
-    if (taxBase > 450_000_000 && state.band !== "D"){
-      state.band = "D";
-      setActive("incomeBand","data-band","D");
+
+    const cur = state.turnover;
+    if (
+      (cur==="T20" && btnT20.disabled) ||
+      (cur==="T60" && btnT60.disabled) ||
+      (cur==="T250" && btnT250.disabled) ||
+      (cur==="T450" && btnT450.disabled)
+    ){
+      state.turnover = pickFirstAllowed();
+      setActive("turnoverBand","data-tb",state.turnover);
+    }
+
+    if (taxBase > 450_000_000 && state.turnover !== "T450P"){
+      state.turnover = "T450P";
+      setActive("turnoverBand","data-tb","T450P");
     }
   }
 
-  function applyOsnoRules(){
-    const isD = (state.band === "D");
-    const btn6 = $("taxRegime").querySelector('button[data-reg="USN_6"]');
-    const btn7 = $("taxRegime").querySelector('button[data-reg="USN_7"]');
-    const btnO = $("taxRegime").querySelector('button[data-reg="OSNO"]');
+  function turnoverLabel(tb){
+    if(tb==="T20") return "до 20 млн";
+    if(tb==="T60") return "20–60 млн";
+    if(tb==="T250") return "60–250 млн";
+    if(tb==="T450") return "250–450 млн";
+    return "> 450 млн";
+  }
 
-    // 1) Физлицо: подтверждённых расходов нет и режимы не нужны
+  function vatRateByTurnover(tb){
+    if (tb === "T20") return 0.00;
+    if (tb === "T60") return 0.05;
+    if (tb === "T250") return 0.05;
+    if (tb === "T450") return 0.07;
+    return OSNO_VAT_RATE; // T450P
+  }
+
+  function ausnAllowed(tb, seller){
+    return (seller === "IP" || seller === "LLC") && (tb === "T20" || tb === "T60");
+  }
+  function isOsnoForced(tb){ return tb === "T450P"; }
+  function isAusnReg(reg){ return reg === "AUSN_8" || reg === "AUSN_20"; }
+  function isDrReg(reg){ return reg === "USN_15" || reg === "USN_7" || reg === "AUSN_20"; }
+
+  function showSellerBlocks(){
+    $("personBlock").style.display = (state.seller === "PERSON") ? "" : "none";
+    $("turnoverWrap").style.display = (state.seller === "PERSON") ? "none" : "";
+
     if (state.seller === "PERSON"){
-      $("taxRegimeWrap").style.display = "none";
+      $("personBizWarn").style.display = (state.personBiz === "YES") ? "" : "none";
+      $("personNoBiz").style.display = (state.personBiz === "NO") ? "" : "none";
+      const showAcq = (state.personBiz === "NO" && state.ownTerm === "3_5");
+      $("acqWrap").style.display = showAcq ? "" : "none";
+
       $("expensesWrap").hidden = true;
       $("expenses").value = "";
+    }
+  }
+
+  function applyRegimeRules(){
+    const taxBase = getTaxBase();
+
+    const btn6  = $("taxRegime").querySelector('button[data-reg="USN_6"]');
+    const btn15 = $("taxRegime").querySelector('button[data-reg="USN_15"]');
+    const btn7  = $("taxRegime").querySelector('button[data-reg="USN_7"]');
+    const btnA8 = $("taxRegime").querySelector('button[data-reg="AUSN_8"]');
+    const btnA20= $("taxRegime").querySelector('button[data-reg="AUSN_20"]');
+    const btnO  = $("taxRegime").querySelector('button[data-reg="OSNO"]');
+
+    if (state.seller === "PERSON"){
+      $("taxRegimeWrap").style.display = "none";
+      $("spb7Hint").style.display = "none";
+      $("usn15Hint").style.display = "none";
+      $("osnoHint").style.display = "none";
+      $("ausnHint").style.display = "none";
+      $("llcModeHint").style.display = "none";
       return;
     } else {
       $("taxRegimeWrap").style.display = "";
     }
 
-    if (isD){
+    // ОСНО принудительно при >450
+    const forcedOsno = isOsnoForced(state.turnover);
+    if (forcedOsno){
       btnO.style.display = "";
-      btn6.disabled = true;
-      btn7.disabled = true;
+      btn6.disabled = true; btn15.disabled = true; btn7.disabled = true;
+      btnA8.disabled = true; btnA20.disabled = true;
+
       state.reg = "OSNO";
       setActive("taxRegime","data-reg","OSNO");
+
       $("expensesWrap").hidden = true;
       $("osnoHint").style.display = "";
+      $("ausnHint").style.display = "none";
+      $("spb7Hint").style.display = "none";
+      $("usn15Hint").style.display = "none";
     } else {
       btnO.style.display = "none";
-      btn6.disabled = false;
-      btn7.disabled = false;
-      if (state.reg === "OSNO"){
+      btn6.disabled = false; btn15.disabled = false; btn7.disabled = false;
+
+      const aOK = ausnAllowed(state.turnover, state.seller);
+      btnA8.disabled  = !aOK;
+      btnA20.disabled = !aOK;
+
+      if (!aOK && isAusnReg(state.reg)){
         state.reg = "USN_6";
         setActive("taxRegime","data-reg","USN_6");
       }
-      $("expensesWrap").hidden = !(state.reg==="USN_7");
+
       $("osnoHint").style.display = "none";
+      $("spb7Hint").style.display = (state.reg === "USN_7") ? "" : "none";
+      $("usn15Hint").style.display = (state.reg === "USN_15") ? "" : "none";
+
+      // ✅ подсказка АУСН: разная по режиму
+      if (state.reg === "AUSN_8"){
+        $("ausnHint").style.display = "";
+        $("ausnHint").textContent = "АУСН 8%: в этом калькуляторе НДС = 0 и взносы ИП “за себя” считаем как 0.";
+      } else if (state.reg === "AUSN_20"){
+        $("ausnHint").style.display = "";
+        $("ausnHint").textContent = "АУСН 20%: учитываем минимальный налог 3% от базы (доходов).";
+      } else {
+        $("ausnHint").style.display = "none";
+        $("ausnHint").textContent = "";
+      }
+
+      $("expensesWrap").hidden = !(state.reg==="USN_15" || state.reg==="USN_7" || state.reg==="AUSN_20");
     }
 
     if (state.seller === "LLC"){
       $("taxRegimeTitle").textContent = "Налоговый режим ООО";
       $("llcModeHint").style.display = "";
-      $("llcModeHint").textContent = (state.reg === "OSNO")
-        ? "ООО на ОСНО: здесь используется упрощённый расчёт (10% налог + 10% НДС). Обычно требуется индивидуальный расчёт (прибыль, входной НДС, расходы)."
-        : "ООО на УСН: применяем расчёт как для УСН (6%/7%) + НДС по диапазону выручки, как в калькуляторе.";
+      $("llcModeHint").textContent =
+        (state.reg === "OSNO")
+          ? "ООО на ОСНО: здесь используется упрощённый расчёт (10% налог + 10% НДС). Обычно требуется индивидуальный расчёт (прибыль, входной НДС, расходы)."
+          : (isAusnReg(state.reg)
+              ? "ООО на АУСН: в калькуляторе НДС = 0, сравнение показывает ориентировочную нагрузку по налогу."
+              : "ООО на УСН: применяем расчёт как для УСН + НДС по диапазону оборота.");
     } else {
       $("taxRegimeTitle").textContent = "Налоговый режим";
       $("llcModeHint").style.display = "none";
     }
+
+    if (requiredReady()){
+      updateTurnoverAvailability(taxBase);
+    }
   }
 
+  // URL share
   function encodeState(obj){
     const json = JSON.stringify(obj);
     const b64 = btoa(unescape(encodeURIComponent(json)))
@@ -590,7 +727,7 @@
       addr: $("addr").value||"",
       sale: parseMoney($("salePrice").value),
       cad: parseMoney($("cadastral").value),
-      band: state.band,
+      turnover: state.turnover,
       reg: state.reg,
       exp: parseMoney($("expenses").value),
       extra: state.extraExpenses,
@@ -599,7 +736,6 @@
       days: parseMoney($("flipDays").value) || 180,
       rentIncome: parseMoney($("rentIncome").value),
       flipExp: state.flipExpenses,
-
       personBiz: state.personBiz,
       ownTerm: state.ownTerm,
       acq: state.acq
@@ -619,7 +755,7 @@
       $("addr").value = st.addr || "";
       $("salePrice").value = st.sale ? fmtInt(st.sale) : "";
       $("cadastral").value = st.cad ? fmtInt(st.cad) : "";
-      state.band = st.band || "A";
+      state.turnover = st.turnover || "T20";
       state.reg  = st.reg || "USN_6";
       $("expenses").value = st.exp ? fmtInt(st.exp) : "";
 
@@ -635,7 +771,7 @@
       state.acq = st.acq || "inherit";
 
       setActive("sellerType","data-seller",state.seller);
-      setActive("incomeBand","data-band",state.band);
+      setActive("turnoverBand","data-tb",state.turnover);
       setActive("taxRegime","data-reg",state.reg);
       setActive("flipToggle","data-flip",state.flip);
       setActive("personBiz","data-biz",state.personBiz);
@@ -650,95 +786,6 @@
     }catch(e){}
   }
 
-  function showSellerBlocks(){
-    $("personBlock").style.display = (state.seller === "PERSON") ? "" : "none";
-    $("flipWrap").style.display = "";
-    $("bandWrap").style.display = (state.seller === "PERSON") ? "none" : "";
-
-    if (state.seller === "PERSON"){
-      $("personBizWarn").style.display = (state.personBiz === "YES") ? "" : "none";
-      $("personNoBiz").style.display = (state.personBiz === "NO") ? "" : "none";
-
-      const showAcq = (state.personBiz === "NO" && state.ownTerm === "3_5");
-      $("acqWrap").style.display = showAcq ? "" : "none";
-
-      // 1) физлицо: подтвержденных расходов нет (страховка от "прилипаний" интерфейса)
-      $("expensesWrap").hidden = true;
-      $("expenses").value = "";
-    }
-  }
-
-  function getVatRate(band, reg){
-    if (reg === "OSNO") return OSNO_VAT_RATE;
-    if (band === "A") return 0;
-    if (band === "B") return 0.05;
-    if (band === "C") return 0.07;
-    return OSNO_VAT_RATE;
-  }
-
-  function computeIpOrLlc(override = null){
-    const salePrice = parseMoney($("salePrice").value);
-    const cadastral = parseMoney($("cadastral").value);
-    const taxBase = Math.max(salePrice, cadastral);
-
-    const band = override?.band ?? state.band;
-    const reg  = override?.reg  ?? state.reg;
-    const seller = override?.seller ?? state.seller;
-
-    if (!override){
-      updateBandAvailability(taxBase);
-      applyOsnoRules();
-    }
-
-    const expensesConfirmed = parseMoney($("expenses").value);
-    const extraCosts = sumList(state.extraExpenses);
-
-    const vatRate = getVatRate(band, reg);
-    const vat = taxBase * vatRate;
-
-    let mainRate = 0;
-    let mainTaxBase = taxBase;
-
-    if (reg === "OSNO"){
-      mainRate = OSNO_TAX_RATE;
-      mainTaxBase = taxBase;
-    } else if (reg === "USN_6"){
-      mainRate = 0.06;
-      mainTaxBase = taxBase;
-    } else {
-      mainRate = 0.07;
-      mainTaxBase = Math.max(taxBase - expensesConfirmed, 0);
-    }
-
-    const mainBefore = mainTaxBase * mainRate;
-
-    let contribFixed = 0, contribExtra = 0, contribTotal = 0, credit = 0, mainAfter = mainBefore;
-
-    if (seller === "IP" && reg !== "OSNO"){
-      contribFixed = FIXED_IP_CONTRIB_2026;
-      const baseForExtra = (reg === "USN_6") ? taxBase : mainTaxBase;
-      contribExtra = Math.max(baseForExtra - EXTRA_THRESHOLD, 0) * EXTRA_RATE;
-      contribExtra = Math.min(contribExtra, EXTRA_CAP);
-      contribTotal = contribFixed + contribExtra;
-
-      credit = Math.min(contribTotal, mainBefore);
-      mainAfter = Math.max(mainBefore - credit, 0);
-    }
-
-    const totalPayable = vat + mainAfter + contribTotal;
-    const netHands = Math.max(salePrice - totalPayable - extraCosts, 0);
-
-    return {
-      salePrice, cadastral, taxBase,
-      expensesConfirmed, extraCosts,
-      vatRate, vat, band, reg, seller,
-      mainBefore, mainAfter, credit,
-      contribFixed, contribExtra, contribTotal,
-      totalPayable, netHands,
-      mainTaxBase, mainRate
-    };
-  }
-
   function ndflFromBase(base){
     return (NDFL_13 * Math.min(base, NDFL_13_LIMIT) + NDFL_15 * Math.max(base - NDFL_13_LIMIT, 0));
   }
@@ -747,7 +794,6 @@
     const salePrice = parseMoney($("salePrice").value);
     const cadastral = parseMoney($("cadastral").value);
     const taxBase = Math.max(salePrice, cadastral);
-
     const extraCosts = sumList(state.extraExpenses);
 
     let ndfl = 0;
@@ -771,121 +817,293 @@
     return {salePrice,cadastral,taxBase,extraCosts,ndfl,totalPayable,netHands};
   }
 
+  function computeIpOrLlc(override = null){
+    const salePrice = parseMoney($("salePrice").value);
+    const cadastral = parseMoney($("cadastral").value);
+    const taxBase = Math.max(salePrice, cadastral);
+
+    const seller = override?.seller ?? state.seller;
+    const turnover = override?.turnover ?? state.turnover;
+    const reg  = override?.reg  ?? state.reg;
+
+    const expOverride = override?.expensesConfirmed;
+    const expensesConfirmed = (typeof expOverride === "number") ? expOverride : parseMoney($("expenses").value);
+
+    const extraCosts = sumList(state.extraExpenses);
+    const isAusn = isAusnReg(reg);
+
+    // НДС
+    let vatRate = 0;
+    if (reg === "OSNO") vatRate = OSNO_VAT_RATE;
+    else if (isAusn) vatRate = 0;
+    else vatRate = vatRateByTurnover(turnover);
+
+    const vat = taxBase * vatRate;
+
+    // Налог
+    let mainRate = 0;
+    let mainTaxBase = taxBase;
+
+    if (reg === "OSNO"){
+      mainRate = OSNO_TAX_RATE;
+      mainTaxBase = taxBase;
+    } else if (reg === "USN_6"){
+      mainRate = 0.06;
+      mainTaxBase = taxBase;
+    } else if (reg === "USN_15"){
+      mainRate = 0.15;
+      mainTaxBase = Math.max(taxBase - expensesConfirmed, 0);
+    } else if (reg === "USN_7"){
+      mainRate = 0.07;
+      mainTaxBase = Math.max(taxBase - expensesConfirmed, 0);
+    } else if (reg === "AUSN_8"){
+      mainRate = AUSN_8;
+      mainTaxBase = taxBase;
+    } else if (reg === "AUSN_20"){
+      mainRate = AUSN_20;
+      mainTaxBase = Math.max(taxBase - expensesConfirmed, 0);
+    }
+
+    let mainBefore = mainTaxBase * mainRate;
+
+    if (reg === "AUSN_20"){
+      const minTax = AUSN_MIN * taxBase;
+      mainBefore = Math.max(mainBefore, minTax);
+    }
+
+    // Взносы: только ИП на УСН (не АУСН, не ОСНО)
+    let contribFixed = 0, contribExtra = 0, contribTotal = 0, credit = 0, mainAfter = mainBefore;
+
+    const isUsn = (reg === "USN_6" || reg === "USN_15" || reg === "USN_7");
+    if (seller === "IP" && isUsn){
+      contribFixed = FIXED_IP_CONTRIB_2026;
+      const baseForExtra = (reg === "USN_6") ? taxBase : mainTaxBase;
+      contribExtra = Math.max(baseForExtra - EXTRA_THRESHOLD, 0) * EXTRA_RATE;
+      contribExtra = Math.min(contribExtra, EXTRA_CAP);
+      contribTotal = contribFixed + contribExtra;
+
+      credit = Math.min(contribTotal, mainBefore);
+      mainAfter = Math.max(mainBefore - credit, 0);
+    }
+
+    const totalPayable = vat + mainAfter + contribTotal;
+    const netHands = Math.max(salePrice - totalPayable - extraCosts, 0);
+
+    return {
+      salePrice, cadastral, taxBase,
+      expensesConfirmed, extraCosts,
+      turnover, reg, seller,
+      vatRate, vat,
+      mainBefore, mainAfter, credit,
+      contribFixed, contribExtra, contribTotal,
+      totalPayable, netHands,
+      mainTaxBase, mainRate
+    };
+  }
+
+  function regTitle(reg){
+    if (reg === "USN_6") return "УСН 6%";
+    if (reg === "USN_15") return "УСН 15% (доходы−расходы)";
+    if (reg === "USN_7") return "УСН 7% (СПб)";
+    if (reg === "AUSN_8") return "АУСН 8%";
+    if (reg === "AUSN_20") return "АУСН 20%";
+    if (reg === "OSNO") return "ОСНО (упрощ.)";
+    return reg;
+  }
+
+  function availableRegsForSeller(turnover, seller){
+    if (seller === "PERSON") return [];
+    if (isOsnoForced(turnover)) return ["OSNO"];
+
+    const regs = ["USN_6","USN_15","USN_7"];
+    if (ausnAllowed(turnover, seller)){
+      regs.push("AUSN_8","AUSN_20");
+    }
+    return regs;
+  }
+
+  function findBestRegFor(seller, turnover, exp){
+    const regs = availableRegsForSeller(turnover, seller);
+    if (!regs.length) return null;
+
+    let best = null;
+    regs.forEach(rg=>{
+      const res = computeIpOrLlc({seller, turnover, reg: rg, expensesConfirmed: exp});
+      if (!best || res.totalPayable < best.totalPayable){
+        best = res;
+      }
+    });
+    return best;
+  }
+
+  // ✅ поиск “сколько расходов нужно”, чтобы DR-режим стал выгоднее “доходов”
+  // Используем перебор (надёжно, учитывает НДС/взносы/минимальный налог АУСН).
+  function findExpenseThresholdToBeat(incomeReg, drReg, seller, turnover, taxBase){
+    const step = 10_000; // 10 тыс достаточно
+    const maxE = taxBase; // больше базы смысла нет
+    const baseIncome = computeIpOrLlc({seller, turnover, reg: incomeReg, expensesConfirmed: 0}).totalPayable;
+
+    for (let e = 0; e <= maxE; e += step){
+      const dr = computeIpOrLlc({seller, turnover, reg: drReg, expensesConfirmed: e}).totalPayable;
+      if (dr + 1 < baseIncome){ // +1 чтобы не дрожало на округлениях
+        return e;
+      }
+    }
+    return null;
+  }
+
+  function renderDrComparisonBlock(){
+    if (state.seller === "PERSON") return "";
+
+    const seller = state.seller;
+    const turnover = state.turnover;
+    const taxBase = getTaxBase();
+    if (!isFinite(taxBase) || taxBase <= 0) return "";
+
+    // если ОСНО принудительно — сравнение DR неактуально
+    if (isOsnoForced(turnover)) return "";
+
+    // 1) лучший режим “доходы”
+    const incomeRegs = ["USN_6"];
+    if (ausnAllowed(turnover, seller)) incomeRegs.push("AUSN_8");
+
+    let bestIncome = null;
+    incomeRegs.forEach(rg=>{
+      const res = computeIpOrLlc({seller, turnover, reg: rg, expensesConfirmed: 0});
+      if (!bestIncome || res.totalPayable < bestIncome.totalPayable) bestIncome = res;
+    });
+    if (!bestIncome) return "";
+
+    // 2) кандидаты “доходы−расходы”
+    const drRegs = ["USN_15","USN_7"];
+    if (ausnAllowed(turnover, seller)) drRegs.push("AUSN_20");
+
+    const lines = [];
+    let bestLine = null;
+
+    drRegs.forEach(drReg=>{
+      const need = findExpenseThresholdToBeat(bestIncome.reg, drReg, seller, turnover, taxBase);
+      if (need === null) return;
+
+      const atNeed = computeIpOrLlc({seller, turnover, reg: drReg, expensesConfirmed: need});
+      const econ = bestIncome.totalPayable - atNeed.totalPayable;
+
+      const line = {drReg, need, econ};
+      lines.push(line);
+
+      if (!bestLine || need < bestLine.need) bestLine = line;
+    });
+
+    if (!lines.length){
+      return `<div class="ok">✅ По текущим параметрам режим “доходы” (<b>${regTitle(bestIncome.reg)}</b>) выгоднее, даже если подтверждать расходы.</div>`;
+    }
+
+    // сортируем по порогу расходов
+    lines.sort((a,b)=>a.need - b.need);
+
+    const listHtml = lines.map(x =>
+      `• Если есть подтвержденных расходов от <b>${fmtInt(x.need)} ₽</b> — выгоднее <b>${regTitle(x.drReg)}</b> (экономия примерно <b>${fmtInt(Math.max(x.econ,0))} ₽</b> относительно ${regTitle(bestIncome.reg)}).`
+    ).join("<br>");
+
+    return `
+      <div class="ok">
+        ✅ Сравнение “доходы” vs “доходы−расходы” (всегда):
+        <br>Базовый выгодный режим “доходы”: <b>${regTitle(bestIncome.reg)}</b>.
+        <div style="margin-top:8px">${listHtml}</div>
+      </div>
+    `;
+  }
+
+  function advisorMessagesIpOrLlc(current){
+    const msgs = [];
+
+    // 1) Самый выгодный режим при текущих (введённых) расходах
+    const currentExp = parseMoney($("expenses").value);
+    const bestNow = findBestRegFor(state.seller, state.turnover, currentExp);
+    if (bestNow){
+      const diff = current.totalPayable - bestNow.totalPayable;
+      if (diff > 0){
+        msgs.push(`<div class="ok">✅ Самый выгодный режим по этому расчёту: <b>${regTitle(bestNow.reg)}</b>. Экономия относительно выбранного: <b>${fmtInt(diff)} ₽</b>.</div>`);
+      } else {
+        msgs.push(`<div class="ok">✅ Выбранный режим уже самый выгодный по этому расчёту: <b>${regTitle(current.reg)}</b>.</div>`);
+      }
+    }
+
+    // 2) Всегда показываем DR-сравнение (УСН/АУСН)
+    const drBlock = renderDrComparisonBlock();
+    if (drBlock) msgs.push(drBlock);
+
+    // 3) АУСН предупреждение про >60 млн — только если база недвижимости ≤ 60 млн
+    if (isAusnReg(current.reg) && current.taxBase <= 60_000_000){
+      msgs.push(`<div class="warn">⚠️ Если оборот станет <b>> 60 млн</b>, режим АУСН использовать нельзя.</div>`);
+    }
+
+    return msgs.join("");
+  }
+
   function advisorMessagesForPersonWhenNdflApplies(personRes, reasonText){
     const msgs = [];
     msgs.push(`<div class="warn">⚠️ ${escapeHtml(reasonText)} Здесь показан расчёт НДФЛ по ставкам 13%/15% от базы <b>max(цена, кадастр)</b>.</div>`);
 
-    const bandAuto = autoBandByBase(personRes.taxBase);
-
-    let bestIp;
-    if (bandAuto === "D"){
-      bestIp = computeIpOrLlc({seller:"IP", band:"D", reg:"OSNO"});
-    } else {
-      const ip6 = computeIpOrLlc({seller:"IP", band:bandAuto, reg:"USN_6"});
-      const ip7 = computeIpOrLlc({seller:"IP", band:bandAuto, reg:"USN_7"});
-      bestIp = (ip7.totalPayable < ip6.totalPayable) ? ip7 : ip6;
-    }
+    // Сравнение “если оформить ИП”
+    const bestIp = findBestRegFor("IP", state.turnover, parseMoney($("expenses").value)) ||
+      computeIpOrLlc({seller:"IP", turnover: state.turnover, reg: (isOsnoForced(state.turnover) ? "OSNO" : "USN_6"), expensesConfirmed: 0});
 
     const diff = personRes.totalPayable - bestIp.totalPayable;
 
     if (diff > 0){
-      msgs.push(
-        `<div class="ok">✅ Если оформить ИП, налоги могут уменьшиться примерно на <b>${fmtInt(diff)} ₽</b>.<br>` +
-        `Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b>.</div>`
-      );
+      msgs.push(`<div class="ok">✅ Если оформить ИП, налоги могут уменьшиться примерно на <b>${fmtInt(diff)} ₽</b>.<br>Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b> (режим: ${regTitle(bestIp.reg)}).</div>`);
     } else {
-      msgs.push(
-        `<div class="ok">✅ Если оформить ИП, по этому упрощённому сравнению экономии может не быть (нужны детали по выручке/режиму/расходам).<br>` +
-        `Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b>.</div>`
-      );
-    }
-    return msgs.join("");
-  }
-
-  function advisorMessagesForPersonWithBiz(personRes){
-    return advisorMessagesForPersonWhenNdflApplies(
-      personRes,
-      "При продаже физлицом (когда объект использовался в предпринимательской деятельности) налог при продаже уплачивается обязательно."
-    );
-  }
-
-  function advisorMessagesIpOrLlc(r){
-    const msgs = [];
-    const taxBase = r.taxBase;
-
-    function simulateWithBand(nextBand){
-      const saveBand = state.band;
-      const saveReg = state.reg;
-
-      state.band = nextBand;
-      if (nextBand === "D") state.reg = "OSNO";
-      const sim = computeIpOrLlc();
-      state.band = saveBand;
-      state.reg = saveReg;
-      applyOsnoRules();
-      return sim;
-    }
-
-    if (state.band === "A"){
-      const simB = simulateWithBand("B");
-      const diff = simB.totalPayable - r.totalPayable;
-      if (diff > 0){
-        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>20 млн</b>, включится НДС (5%) и итог к уплате вырастет на <b>${fmtInt(diff)} ₽</b>.</div>`);
-      }
-    }
-
-    if (state.band === "B"){
-      const simC = simulateWithBand("C");
-      const diff = simC.totalPayable - r.totalPayable;
-      if (diff > 0){
-        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>250 млн</b>, ставка НДС станет 7% и итог к уплате вырастет на <b>${fmtInt(diff)} ₽</b>.</div>`);
-      }
-    }
-
-    if (state.band === "C"){
-      const simD = simulateWithBand("D");
-      const diff = simD.totalPayable - r.totalPayable;
-      if (diff > 0){
-        msgs.push(`<div class="warn">⚠️ Если выручка перейдёт порог <b>450 млн</b>, расчёт перейдёт на ОСНО (упрощ.) и итог к уплате может вырасти на <b>${fmtInt(diff)} ₽</b>. Нужен индивидуальный расчёт.</div>`);
-      }
-    }
-
-    function savingIfLowerBand(lowerBand, threshold){
-      const saveBand = state.band;
-      const saveReg  = state.reg;
-      const cur = r.totalPayable;
-
-      state.band = lowerBand;
-      if (lowerBand !== "D" && state.reg === "OSNO") state.reg = "USN_6";
-      const low = computeIpOrLlc().totalPayable;
-
-      state.band = saveBand;
-      state.reg  = saveReg;
-      applyOsnoRules();
-
-      const diff = cur - low;
-      if (diff > 0){
-        msgs.push(`<div class="ok">✅ Если выручка будет ≤ <b>${fmtInt(threshold)} ₽</b>, итог к уплате снизится на <b>${fmtInt(diff)} ₽</b>.</div>`);
-      }
-    }
-
-    if (state.band === "B" && taxBase <= 20_000_000) savingIfLowerBand("A", 20_000_000);
-    if (state.band === "C" && taxBase <= 250_000_000) savingIfLowerBand("B", 250_000_000);
-    if (state.band === "D" && taxBase <= 450_000_000) savingIfLowerBand("C", 450_000_000);
-
-    if (state.reg === "USN_6"){
-      const need = taxBase / 7;
-      msgs.push(`<div class="ok">✅ Если подтвержденные расходы будут больше <b>${fmtInt(need)} ₽</b>, то режим <b>7% доходы − расходы</b> будет выгоднее по налогу.</div>`);
+      msgs.push(`<div class="ok">✅ Если оформить ИП, по этому упрощённому сравнению экономии может не быть (нужны детали по выручке/режиму/расходам).<br>Налоги ИП по этому упрощённому сравнению: <b>${fmtInt(bestIp.totalPayable)} ₽</b> (режим: ${regTitle(bestIp.reg)}).</div>`);
     }
 
     return msgs.join("");
+  }
+
+  function renderFlip(resForTaxes){
+    if (state.flip !== "ON"){
+      $("flipResults").hidden = true;
+      return;
+    }
+
+    $("flipResults").hidden = false;
+
+    const buy  = parseMoney($("buyPrice").value);
+    const days = parseMoney($("flipDays").value) || 180;
+    const rentIncome = parseMoney($("rentIncome").value);
+    const flipExtra = sumList(state.flipExpenses);
+
+    $("rRentIncome").textContent = plus(rentIncome);
+
+    const totalCosts = buy + flipExtra + resForTaxes.extraCosts;
+    const profitNet = (resForTaxes.salePrice + rentIncome) - totalCosts - resForTaxes.totalPayable;
+
+    const profitEl = $("rFlipProfit");
+    profitEl.textContent = (profitNet>=0) ? inflow(profitNet) : outflow(Math.abs(profitNet));
+    profitEl.className = "v " + (profitNet>=0 ? "pos" : "neg");
+
+    const invested = totalCosts > 0 ? totalCosts : 0;
+    const apr = (days>0 && invested>0) ? (profitNet/invested) * (365/days) : NaN;
+    const aprEl = $("rFlipAPR");
+    if (isFinite(apr)){
+      aprEl.textContent = (apr*100).toFixed(1) + "%";
+      aprEl.className = "v " + (apr>=0 ? "pos" : "neg");
+    } else {
+      aprEl.textContent = "—";
+      aprEl.className = "v";
+    }
   }
 
   function render(){
     $("message").innerHTML = "";
 
     showSellerBlocks();
-    applyOsnoRules();
+
+    if (requiredReady() && state.seller !== "PERSON"){
+      updateTurnoverAvailability(getTaxBase());
+    }
+
+    applyRegimeRules();
 
     if(!requiredReady()){
       $("needFieldsBox").hidden = false;
@@ -913,95 +1131,60 @@
 
     let advisor = "";
 
+    // PERSON
     if (state.seller === "PERSON"){
       const r = computePerson();
 
       $("rTaxBase").textContent = fmtMoney(r.taxBase);
-
       $("vatLines").style.display = "none";
 
       $("ipOrLlcTaxBlock").style.display = "none";
       $("personTaxBlock").style.display = "";
       $("splitIpOrLlc").style.display = "none";
 
-      // 1) физлицо: подтвержденные расходы не показываем никогда
       $("lineConfirmedExpenses").style.display = "none";
 
       $("rNdfl").textContent = outflow(r.ndfl);
-
       $("rExtraCosts").textContent = outflow(r.extraCosts);
       $("rTotalPayable").textContent = outflow(r.totalPayable);
       $("rNetHands").textContent = inflow(r.netHands);
 
-      if (state.personBiz === "YES"){
-        advisor = advisorMessagesForPersonWithBiz(r);
+      if (r.ndfl > 0){
+        const reason = (state.personBiz === "YES")
+          ? "При продаже физлицом (когда объект использовался в предпринимательской деятельности) налог при продаже уплачивается обязательно."
+          : "Если не выполнен минимальный срок владения (или способ получения не льготный), возникает НДФЛ.";
+        advisor = advisorMessagesForPersonWhenNdflApplies(r, reason);
       } else {
-        if (r.ndfl > 0){
-          advisor = advisorMessagesForPersonWhenNdflApplies(
-            r,
-            "Если не выполнен минимальный срок владения (или способ получения не льготный), возникает НДФЛ."
-          );
-        } else {
-          advisor = `<div class="ok">✅ В вашем случае НДФЛ = 0 (по выбранному сроку владения/способу получения).</div>`;
-        }
+        advisor = `<div class="ok">✅ В вашем случае НДФЛ = 0 (по выбранному сроку владения/способу получения).</div>`;
       }
 
       $("advisorBox").innerHTML = advisor;
-
-      if (state.flip === "ON"){
-        $("flipResults").hidden = false;
-
-        const buy  = parseMoney($("buyPrice").value);
-        const days = parseMoney($("flipDays").value) || 180;
-        const rentIncome = parseMoney($("rentIncome").value);
-        const flipExtra = sumList(state.flipExpenses);
-
-        $("rRentIncome").textContent = plus(rentIncome);
-
-        const totalCosts = buy + flipExtra + r.extraCosts;
-        const profitNet = (r.salePrice + rentIncome) - totalCosts - r.totalPayable;
-
-        const profitEl = $("rFlipProfit");
-        profitEl.textContent = (profitNet>=0) ? inflow(profitNet) : outflow(Math.abs(profitNet));
-        profitEl.className = "v " + (profitNet>=0 ? "pos" : "neg");
-
-        const invested = totalCosts > 0 ? totalCosts : 0;
-        const apr = (days>0 && invested>0) ? (profitNet/invested) * (365/days) : NaN;
-        const aprEl = $("rFlipAPR");
-        if (isFinite(apr)){
-          aprEl.textContent = (apr*100).toFixed(1) + "%";
-          aprEl.className = "v " + (apr>=0 ? "pos" : "neg");
-        } else {
-          aprEl.textContent = "—";
-          aprEl.className = "v";
-        }
-      } else {
-        $("flipResults").hidden = true;
-      }
-
+      renderFlip(r);
       updateUrl();
       return;
     }
 
+    // IP / LLC
     $("vatLines").style.display = "";
 
     const r = computeIpOrLlc();
 
     $("rTaxBase").textContent = fmtMoney(r.taxBase);
 
-    if (state.reg === "USN_7"){
+    if (state.reg === "USN_15" || state.reg === "USN_7" || state.reg === "AUSN_20"){
       $("lineConfirmedExpenses").style.display = "";
       $("rConfirmedExpenses").textContent = plus(r.expensesConfirmed);
     } else {
       $("lineConfirmedExpenses").style.display = "none";
     }
 
-    const vatLabel =
-      (state.reg === "OSNO") ? "10% (ОСНО, упрощ.)" :
-      (state.band==="A") ? "0%" :
-      (state.band==="B") ? "5%" :
-      (state.band==="C") ? "7%" :
-      "10% (ОСНО, упрощ.)";
+    let vatLabel = "—";
+    if (state.reg === "OSNO") vatLabel = "10% (ОСНО, упрощ.)";
+    else if (isAusnReg(state.reg)) vatLabel = "0% (АУСН)";
+    else {
+      const vr = vatRateByTurnover(state.turnover);
+      vatLabel = (vr === 0) ? "0%" : (vr === 0.05 ? "5%" : (vr === 0.07 ? "7%" : "10%"));
+    }
 
     $("rVatRate").textContent = vatLabel;
     $("rVat").textContent = outflow(r.vat);
@@ -1012,7 +1195,8 @@
 
     $("rMainTaxBefore").textContent = outflow(r.mainBefore);
 
-    if (state.seller === "IP" && state.reg !== "OSNO"){
+    const isUsn = (state.reg==="USN_6" || state.reg==="USN_15" || state.reg==="USN_7");
+    if (state.seller === "IP" && isUsn){
       $("contribBlock").style.display = "";
       $("lineCredit").style.display = "";
       $("rCredit").textContent = plus(r.credit);
@@ -1027,47 +1211,17 @@
     $("rMainTaxAfter").textContent = outflow(r.mainAfter);
 
     $("rExtraCosts").textContent = outflow(r.extraCosts);
-
     $("rTotalPayable").textContent = outflow(r.totalPayable);
     $("rNetHands").textContent = inflow(r.netHands);
 
     advisor = advisorMessagesIpOrLlc(r);
     $("advisorBox").innerHTML = advisor;
 
-    if (state.flip === "ON"){
-      $("flipResults").hidden = false;
-
-      const buy  = parseMoney($("buyPrice").value);
-      const days = parseMoney($("flipDays").value) || 180;
-      const rentIncome = parseMoney($("rentIncome").value);
-      const flipExtra = sumList(state.flipExpenses);
-
-      $("rRentIncome").textContent = plus(rentIncome);
-
-      const totalCosts = buy + flipExtra + r.extraCosts;
-      const profitNet = (r.salePrice + rentIncome) - totalCosts - r.totalPayable;
-
-      const profitEl = $("rFlipProfit");
-      profitEl.textContent = (profitNet>=0) ? inflow(profitNet) : outflow(Math.abs(profitNet));
-      profitEl.className = "v " + (profitNet>=0 ? "pos" : "neg");
-
-      const invested = totalCosts > 0 ? totalCosts : 0;
-      const apr = (days>0 && invested>0) ? (profitNet/invested) * (365/days) : NaN;
-      const aprEl = $("rFlipAPR");
-      if (isFinite(apr)){
-        aprEl.textContent = (apr*100).toFixed(1) + "%";
-        aprEl.className = "v " + (apr>=0 ? "pos" : "neg");
-      } else {
-        aprEl.textContent = "—";
-        aprEl.className = "v";
-      }
-    } else {
-      $("flipResults").hidden = true;
-    }
-
+    renderFlip(r);
     updateUrl();
   }
 
+  // handlers
   ["salePrice","cadastral","expenses","buyPrice","flipDays","rentIncome"].forEach(id=>{
     $(id).addEventListener("input", ()=>{
       formatInputThousands($(id));
@@ -1082,27 +1236,37 @@
     state.seller = s;
     setActive("sellerType","data-seller",s);
 
+    if (s === "PERSON"){
+      $("expenses").value = "";
+      $("expensesWrap").hidden = true;
+    }
+
     showSellerBlocks();
-    applyOsnoRules();
+    applyRegimeRules();
     render();
   });
 
-  $("incomeBand").addEventListener("click", (e)=>{
-    const b = e.target?.getAttribute?.("data-band");
-    if(!b || e.target.disabled) return;
-    state.band = b;
-    setActive("incomeBand","data-band",b);
-    applyOsnoRules();
+  $("turnoverBand").addEventListener("click", (e)=>{
+    const tb = e.target?.getAttribute?.("data-tb");
+    if(!tb || e.target.disabled) return;
+    state.turnover = tb;
+    setActive("turnoverBand","data-tb",tb);
+    applyRegimeRules();
     render();
   });
 
   $("taxRegime").addEventListener("click", (e)=>{
-    const r = e.target?.getAttribute?.("data-reg");
-    if(!r) return;
-    if(state.band==="D" && r !== "OSNO") return;
-    state.reg = r;
-    setActive("taxRegime","data-reg",r);
-    $("expensesWrap").hidden = !(state.reg==="USN_7");
+    const rg = e.target?.getAttribute?.("data-reg");
+    if(!rg) return;
+
+    if (state.seller === "PERSON") return;
+    if (isOsnoForced(state.turnover) && rg !== "OSNO") return;
+    if (isAusnReg(rg) && !ausnAllowed(state.turnover, state.seller)) return;
+
+    state.reg = rg;
+    setActive("taxRegime","data-reg",rg);
+
+    $("expensesWrap").hidden = !(state.reg==="USN_15" || state.reg==="USN_7" || state.reg==="AUSN_20");
     render();
   });
 
@@ -1163,23 +1327,32 @@
 `Формулы (ИП/ООО):
 1) База = max(Цена продажи, Кадастровая)
 
-2) НДС (по диапазону):
-до 20 млн: 0%
-20–250 млн: 5%
-250–450 млн: 7%
->450 млн: ОСНО (упрощ.) 10%
-НДС = База * ставка
+2) НДС:
+— УСН: по обороту (после продажи):
+   до 20 млн: 0%
+   20–250 млн: 5%
+   250–450 млн: 7%
+   > 450 млн: ОСНО (упрощ.) 10%
+— АУСН: НДС = 0 (в калькуляторе)
+— ОСНО (упрощ.): 10%
 
 3) Налог:
-6%: НалогДо = База * 6%
-7%: БазаНал = max(База − ПодтвержденныеРасходы, 0)
-    НалогДо = БазаНал * 7%
+УСН 6%: НалогДо = База * 6%
+УСН 15%: БазаНал = max(База − ПодтвРасходы, 0)
+         НалогДо = БазаНал * 15%
+УСН 7% (СПб): БазаНал = max(База − ПодтвРасходы, 0)
+             НалогДо = БазаНал * 7%
+
+АУСН 8%: НалогДо = База * 8%
+АУСН 20%: БазаНал = max(База − ПодтвРасходы, 0)
+         НалогДо = max(БазаНал * 20%, База * 3%)
+
 ОСНО (упрощ.): НалогДо = База * 10%
 
-4) Взносы ИП (2026):
+4) Взносы ИП (2026) — считаем только для ИП на УСН (НЕ АУСН, НЕ ОСНО):
 Фикс = 57 390
 Доп = min( 1% * max(БазаДля1% − 300 000, 0), 321 818 )
-БазаДля1% = База (для 6%) или БазаНал (для 7%)
+БазаДля1% = База (для 6%) или БазаНал (для 15%/7%)
 
 5) Компенсация(зачёт) = min(ВзносыИтого, НалогДо)
 НалогКУплате = max(НалогДо − Компенсация, 0)
@@ -1205,7 +1378,7 @@
     $("rentIncome").value = "";
 
     state.seller="IP";
-    state.band="A";
+    state.turnover="T20";
     state.reg="USN_6";
     state.flip="OFF";
     state.showFormula=false;
@@ -1216,7 +1389,7 @@
     state.acq="inherit";
 
     setActive("sellerType","data-seller","IP");
-    setActive("incomeBand","data-band","A");
+    setActive("turnoverBand","data-tb","T20");
     setActive("taxRegime","data-reg","USN_6");
     setActive("flipToggle","data-flip","OFF");
     setActive("personBiz","data-biz","YES");
@@ -1255,16 +1428,19 @@
       if(!requiredReady()) return;
       updateUrl();
 
-      let txt = `RBMGROUP.RU\nКалькулятор налогов — продажа коммерческой недвижимости (СПб)\nВерсия: ${APP_VERSION}\nАдрес: ${($("addr").value||"").trim() || "—"}\nСсылка: ${window.location.href}\n`;
+      let txt = `RBMGROUP.RU\nКалькулятор налогов — продажа коммерческой недвижимости (СПб)\nВерсия: ${APP_VERSION}\nАдрес: ${($("addr").value||"").trim() || "—"}\n`;
+      if (state.seller !== "PERSON") txt += `Оборот: ${turnoverLabel(state.turnover)}\n`;
+      txt += `Ссылка: ${window.location.href}\n`;
 
       if (state.seller === "PERSON"){
         const r = computePerson();
         txt += `\nКто продаёт: Физлицо\nЦена продажи: ${fmtMoney(r.salePrice)}\nКадастровая: ${fmtMoney(r.cadastral)}\nБаза: ${fmtMoney(r.taxBase)}\nНДФЛ: ${outflow(r.ndfl)}\nДоп. расходы: ${outflow(r.extraCosts)}\nИтого государству: ${outflow(r.totalPayable)}\nНа руки: ${inflow(r.netHands)}\n`;
       } else {
         const r = computeIpOrLlc();
-        txt += `\nКто продаёт: ${state.seller === "IP" ? "ИП" : "ООО"}\nРежим: ${state.reg}\nДиапазон выручки: ${state.band}\nЦена продажи: ${fmtMoney(r.salePrice)}\nКадастровая: ${fmtMoney(r.cadastral)}\nБаза: ${fmtMoney(r.taxBase)}\nНДС: ${outflow(r.vat)}\nНалог к уплате: ${outflow(r.mainAfter)}\n`;
-        if (state.reg === "USN_7") txt += `Подтв. расходы: ${plus(r.expensesConfirmed)}\n`;
-        if (state.seller === "IP" && state.reg !== "OSNO"){
+        txt += `\nКто продаёт: ${state.seller === "IP" ? "ИП" : "ООО"}\nРежим: ${regTitle(state.reg)}\nЦена продажи: ${fmtMoney(r.salePrice)}\nКадастровая: ${fmtMoney(r.cadastral)}\nБаза: ${fmtMoney(r.taxBase)}\nНДС: ${outflow(r.vat)}\nНалог к уплате: ${outflow(r.mainAfter)}\n`;
+        if (state.reg === "USN_15" || state.reg === "USN_7" || state.reg === "AUSN_20") txt += `Подтв. расходы: ${plus(r.expensesConfirmed)}\n`;
+        const isUsn = (state.reg==="USN_6" || state.reg==="USN_15" || state.reg==="USN_7");
+        if (state.seller === "IP" && isUsn){
           txt += `Взносы: ${outflow(r.contribTotal)}\nКомпенсация (зачёт): ${plus(r.credit)}\n`;
         }
         txt += `Доп. расходы: ${outflow(r.extraCosts)}\nИтого государству: ${outflow(r.totalPayable)}\nНа руки: ${inflow(r.netHands)}\n`;
@@ -1284,8 +1460,9 @@
     renderExpenseList("flipExpensesList", state.flipExpenses);
 
     loadFromUrl();
+
     setActive("sellerType","data-seller",state.seller);
-    setActive("incomeBand","data-band",state.band);
+    setActive("turnoverBand","data-tb",state.turnover);
     setActive("taxRegime","data-reg",state.reg);
     setActive("flipToggle","data-flip",state.flip);
     setActive("personBiz","data-biz",state.personBiz);
@@ -1293,9 +1470,9 @@
     setActive("acqType","data-acq",state.acq);
 
     showSellerBlocks();
-    applyOsnoRules();
+    applyRegimeRules();
 
-    $("expensesWrap").hidden = !(state.reg==="USN_7");
+    $("expensesWrap").hidden = !(state.reg==="USN_15" || state.reg==="USN_7" || state.reg==="AUSN_20");
     $("flipBlock").hidden = (state.flip==="OFF");
 
     render();
